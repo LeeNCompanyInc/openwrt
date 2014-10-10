@@ -529,14 +529,20 @@ $(eval $(call KernelPackage,nfnetlink-log))
 
 define KernelPackage/nfnetlink-queue
   TITLE:=Netfilter QUEUE over NFNETLINK interface
-  FILES:=$(LINUX_DIR)/net/netfilter/nfnetlink_queue.ko
-  KCONFIG:=CONFIG_NETFILTER_NETLINK_QUEUE
-  AUTOLOAD:=$(call AutoLoad,48,nfnetlink_queue)
+  FILES:= \
+	$(LINUX_DIR)/net/netfilter/nfnetlink_queue.ko \
+	$(LINUX_DIR)/net/netfilter/xt_NFQUEUE.ko
+  KCONFIG:= \
+	CONFIG_NETFILTER_NETLINK_QUEUE \
+	CONFIG_NETFILTER_XT_TARGET_NFQUEUE
+  AUTOLOAD:=$(call AutoLoad,48,nfnetlink_queue xt_NFQUEUE)
   $(call AddDepends/nfnetlink)
 endef
 
 define KernelPackage/nfnetlink-queue/description
  Kernel modules support for queueing packets via NFNETLINK
+ Includes:
+ - NFQUEUE
 endef
 
 $(eval $(call KernelPackage,nfnetlink-queue))

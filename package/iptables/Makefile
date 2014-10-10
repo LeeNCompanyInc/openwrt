@@ -98,6 +98,20 @@ Extra iptables extensions for connection tracking.
 
 endef
 
+define Package/iptables-mod-nfqueue
+$(call Package/iptables/Module, +kmod-nfnetfilter-queue)
+  TITLE:=Userspace packet queue extensions
+endef
+
+define Package/iptables-mod-nfqueue/description
+iptables extensions for sending packets to userspace queues.
+Includes support for:
+
+ Matches:
+  - NFQUEUE
+
+endef
+
 define Package/iptables-mod-filter
 $(call Package/iptables/Module, +kmod-ipt-filter)
   TITLE:=Content inspection extensions
@@ -459,6 +473,7 @@ L7_INSTALL:=\
 $(eval $(call BuildPackage,iptables))
 $(eval $(call BuildPlugin,iptables-mod-conntrack-extra,$(IPT_CONNTRACK_EXTRA-m)))
 $(eval $(call BuildPlugin,iptables-mod-extra,$(IPT_EXTRA-m)))
+$(eval $(call BuildPlugin,iptables-mod-nfqueue,xt_NFQUEUE))
 $(eval $(call BuildPlugin,iptables-mod-filter,$(IPT_FILTER-m),$(L7_INSTALL)))
 $(eval $(call BuildPlugin,iptables-mod-ipopt,$(IPT_IPOPT-m)))
 $(eval $(call BuildPlugin,iptables-mod-ipsec,$(IPT_IPSEC-m)))
