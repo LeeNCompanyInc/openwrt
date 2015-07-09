@@ -9,8 +9,9 @@ include $(TOPDIR)/rules.mk
 ARCH:=mips
 BOARD:=ar71xx
 BOARDNAME:=Atheros AR7xxx/AR9xxx
-FEATURES:=mips16
-CPU_TYPE=34kc
+#FEATURES:=mips16
+CPU_TYPE=74kc
+CPU_SUBTYPE:=dsp2
 SUBTARGETS:=generic nand mikrotik
 
 KERNEL_PATCHVER:=3.10
