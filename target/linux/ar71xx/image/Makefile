@@ -455,7 +455,8 @@ define Image/Build/CameoHornet
 				-o $(call imgname,$(1),$(2))-factory$$$$dashr.bin; \
 			true; \
 		done; \
-	fi
+	fi ; \
+	echo ""
 endef
 
 Image/Build/CameoAP121/buildkernel=$(call MkuImageLzma,$(2),$(3) $(cameo_ap121_mtdlayout))
@@ -579,7 +580,8 @@ define Image/Build/UAPPRO
 	-$(STAGING_DIR_HOST)/bin/mkfwimage2 -f 0x9f000000 \
 		-v $(5).$(6).v6.0.0-OpenWrt-$(REVISION) \
 		-p jffs2:0x50000:0xf60000:0:0:$(call sysupname,$(1),$(2)) \
-		-o $(call factoryname,$(1),$(2))
+		-o $(call factoryname,$(1),$(2)) \
+	echo ""
 endef
 
 # $(4) = board (XS2, XS5, RS, XM)
@@ -596,7 +598,8 @@ define Image/Build/UBNT2
 			-k $(KDIR_TMP)/$(2)-mtdpart-kernel.bin \
 			-r $(KDIR_TMP)/$(2)-mtdpart-rootfs.bin \
 			-o $(call factoryname,$(1),$(2)); \
-	fi
+	fi ; \
+	echo ""
 endef
 
 Image/Build/UBNTXM/initramfs=$(call MkuImageLzma/initramfs,$(2),$(3) $(ubntxm_mtdlayout))
@@ -813,23 +816,25 @@ define Image/Build/TPLINK-LZMA/initramfs
 		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) $(7) -s \
 		-k $(KDIR_TMP)/vmlinux-initramfs-$(2).bin.lzma \
 		-o $(call imgname,$(1),$(2))-uImage.bin
+	echo ""
 endef
 
 
 define Image/Build/CyberTAN
 	echo -n '' > $(KDIR_TMP)/empty.bin
-	$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp \
+	-$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp \
 		-f $(KDIR_TMP)/vmlinux-$(2).uImage -F $(KDIR_TMP)/empty.bin \
 		-x 32 -a 0x10000 -x -32 -f $(KDIR)/root.$(1)
 	-$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(5) \
 		-i $(KDIR)/image.tmp \
 		-o $(call sysupname,$(1),$(2))
-	$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp -f $(KDIR_TMP)/vmlinux-$(2).uImage \
+	-$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp -f $(KDIR_TMP)/vmlinux-$(2).uImage \
 		-x 32 -a 0x10000 -x -32 -f $(KDIR)/root.$(1)
 	-$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(5) -g \
 		-i $(KDIR)/image.tmp \
 		-o $(call factoryname,$(1),$(2))
-	rm $(KDIR)/image.tmp
+	rm $(KDIR)/image.tmp ; \
+	echo ""
 endef
 
 Image/Build/CyberTANGZIP/loader=$(call Image/BuildLoader,$(1),gz,$(2),0x80060000)
@@ -1013,7 +1018,8 @@ define Image/Build/Zcomax
 			-k $(KDIR_TMP)/vmlinux-$(2).uImage \
 			-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
 			-o $(call imgname,$(1),$(2))-factory.img; \
-	fi
+	fi ; \
+	echo ""
 endef
 
 
