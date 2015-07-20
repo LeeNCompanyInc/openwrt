@@ -256,6 +256,7 @@ y1s)
 	set_usb_led "$board:blue:usb"
 	set_wifi_led "$board:blue:wifi"
 	;;
+zbt-we826|\
 zbt-wa05)
 	ucidef_set_led_default "power" "power" "$board:blue:power" "1"
 	set_wifi_led "$board:blue:air"
