@@ -138,6 +138,15 @@ platform_check_image() {
 	[ "$#" -gt 1 ] && return 1
 
 	case "$board" in
+	 wpe71 | \
+         wp546 | \
+         wpj558 | \
+         wpj531 | \
+         wpj342 | \
+         wpj344)
+                 platform_check_image_cpximg "$1" && return 0
+                 return 1
+                 ;;
 	all0315n | \
 	all0258n | \
 	cap4200ag)
@@ -393,6 +402,14 @@ platform_do_upgrade() {
 	local board=$(ar71xx_board_name)
 
 	case "$board" in
+         wpe71 | \
+         wp546 | \
+         wpj558 | \
+         wpj531 | \
+         wpj342 | \
+         wpj344)
+                platform_do_upgrade_cpximg "$ARGV"
+                ;;
 	routerstation | \
 	routerstation-pro | \
 	ls-sr71 | \

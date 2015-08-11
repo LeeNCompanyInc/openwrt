@@ -6,6 +6,20 @@
 AR71XX_BOARD_NAME=
 AR71XX_MODEL=
 
+ar71xx_eth_desc() {
+        ethrdesc="(Right Port, PoE input)"
+        ethldesc="(Left Port, PoE output)"
+        [ -n "$1"  ] && {
+          mkdir -p /tmp/sysinfo/$1
+          echo -n "$ethrdesc" > /tmp/sysinfo/$1/desc
+        }
+        [ -n "$2"  ] && {
+          mkdir -p /tmp/sysinfo/$2
+          echo -n "$ethldesc" > /tmp/sysinfo/$2/desc
+        }
+}
+
+
 ar71xx_get_mtd_offset_size_format() {
 	local mtd="$1"
 	local offset="$2"
@@ -676,6 +690,30 @@ ar71xx_board_detect() {
 	*WPE72)
 		name="wpe72"
 		;;
+	*WPJ342)
+		name="wpj342"
+                ethports="eth0 eth1"
+                ar71xx_eth_desc eth0 eth1
+                wmacinfo="2 2"
+		;;
+	*WPJ344)
+		name="wpj344"
+                ethports="eth0 eth1"
+                ar71xx_eth_desc eth0 eth1
+                wmacinfo="2 2"
+		;;
+	*WPJ558)
+		name="wpj558"
+                ethports="eth0 eth1"
+                ar71xx_eth_desc eth0 eth1
+                wmacinfo="2 2"
+		;;
+	*WPJ531)
+		name="wpj531"
+                ethports="eth0 eth1"
+                ar71xx_eth_desc eth0 eth1
+                wmacinfo="2 2"
+		;;
 	*WNDAP360)
 		name="wndap360"
 		;;
@@ -753,16 +791,25 @@ ar71xx_board_detect() {
 		;;
 	esac
 
-	[ -z "$name" ] && name="unknown"
 
-	[ -z "$AR71XX_BOARD_NAME" ] && AR71XX_BOARD_NAME="$name"
-	[ -z "$AR71XX_MODEL" ] && AR71XX_MODEL="$machine"
+        [ -z "$name"  ] && name="unknown"
 
-	[ -e "/tmp/sysinfo/" ] || mkdir -p "/tmp/sysinfo/"
+        [ -z "$AR71XX_BOARD_NAME"  ] && AR71XX_BOARD_NAME="$name"
+        [ -z "$AR71XX_MODEL"  ] && AR71XX_MODEL="$machine"
 
-	echo "$AR71XX_BOARD_NAME" > /tmp/sysinfo/board_name
-	echo "$AR71XX_MODEL" > /tmp/sysinfo/model
-}
+        [ -e "/tmp/sysinfo/"  ] || mkdir -p "/tmp/sysinfo/"
+
+        echo "$AR71XX_BOARD_NAME" > /tmp/sysinfo/board_name
+        if [ -e /etc/default/model  ]; then
+          cp /etc/default/model /tmp/sysinfo/
+        else
+          echo "${AR71XX_MODEL##Compex }" > /tmp/sysinfo/model
+        fi
+        echo "$ethports" > /tmp/sysinfo/ethports
+
+        # wmacinfo: 1st num = num of radio, 2nd num = index to wireless mac addresses
+        echo "$wmacinfo" > /tmp/sysinfo/wmacinfo
+        }
 
 ar71xx_board_name() {
 	local name

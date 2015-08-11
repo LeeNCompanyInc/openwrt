@@ -9,6 +9,39 @@
 board=$(ar71xx_board_name)
 
 case "$board" in
+wpj342)
+        ucidef_set_rssimon "ath" "1000000" "1"
+        uci set system.rssid_ath.dev=ath0
+        ucidef_set_led_rssi "sig1" "SIG1" "wpj342:red:sig1" "ath" "-85" "-1" "0" "1"
+        ucidef_set_led_rssi "sig2" "SIG2" "wpj342:yellow:sig2" "ath" "-75" "-1" "0" "1"
+        ucidef_set_led_rssi "sig3" "SIG3" "wpj342:green:sig3" "ath" "-65" "-1" "0" "1"
+        ucidef_set_led_rssi "sig4" "SIG4" "wpj342:green:sig4" "ath" "-55" "-1" "0" "1"
+        uci set system.sysbuzzer=buzzer
+        uci set system.sysbuzzer.sysfs=wpj342:buzzer
+        ;;
+
+wpj344)
+        ucidef_set_rssimon "ath" "1000000" "1"
+        uci set system.rssid_ath.dev=ath0
+        ucidef_set_led_rssi "sig1" "SIG1" "wpj344:red:sig1" "ath" "-85" "-1" "0" "1"
+        ucidef_set_led_rssi "sig2" "SIG2" "wpj344:yellow:sig2" "ath" "-75" "-1" "0" "1"
+        ucidef_set_led_rssi "sig3" "SIG3" "wpj344:green:sig3" "ath" "-65" "-1" "0" "1"
+        ucidef_set_led_rssi "sig4" "SIG4" "wpj344:green:sig4" "ath" "-55" "-1" "0" "1"
+        uci set system.sysbuzzer=buzzer
+        uci set system.sysbuzzer.sysfs=wpj344:buzzer
+        ;;
+
+wpj558)
+        ucidef_set_rssimon "ath" "1000000" "1"
+        uci set system.rssid_ath.dev=ath0
+        ucidef_set_led_rssi "sig1" "SIG1" "wpj558:red:sig1" "ath" "-85" "-1" "0" "1"
+        ucidef_set_led_rssi "sig2" "SIG2" "wpj558:yellow:sig2" "ath" "-75" "-1" "0" "1"
+        ucidef_set_led_rssi "sig3" "SIG3" "wpj558:green:sig3" "ath" "-65" "-1" "0" "1"
+        ucidef_set_led_rssi "sig4" "SIG4" "wpj558:green:sig4" "ath" "-55" "-1" "0" "1"
+        uci set system.sysbuzzer=buzzer
+        uci set system.sysbuzzer.sysfs=wpj558:buzzer
+        ;;
+
 airgateway)
 	ucidef_set_led_wlan "wlan" "WLAN" "ubnt:blue:wlan" "phy0tpt"
 	;;

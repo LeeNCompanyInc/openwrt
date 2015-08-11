@@ -313,8 +313,15 @@ tl-wr703n |\
 tube2h |\
 wndap360 |\
 mynet-rext |\
+wpj342 |\
 wp543)
 	ucidef_set_interface_lan "eth0"
+	;;
+
+wpj558)
+        ucidef_set_interfaces_lan_wan "eth0" "eth1"
+        ucidef_add_switch "switch0" "1" "1"
+        ucidef_add_switch_vlan "switch0" "1" "0 1 2 3 4 5 6"
 	;;
 
 dir-505-a1)

@@ -1,0 +1,42 @@
+--- a/arch/mips/ath79/Kconfig
++++ b/arch/mips/ath79/Kconfig
+@@ -295,6 +295,19 @@ config ATH79_MACH_WPJ344
+ 	help
+ 	  Say 'Y' here if you want your kernel to support the
+ 	  Atheros WPJ344 reference board.
++     
++config ATH79_MACH_WPJ558
++        bool "Compex WPJ558 board support"
++        select SOC_QCA955X
++        select ATH79_DEV_ETH
++        select ATH79_DEV_GPIO_BUTTONS
++        select ATH79_DEV_LEDS_GPIO
++        select ATH79_DEV_M25P80
++        select ATH79_DEV_USB
++        select ATH79_DEV_WMAC
++        help
++          Say 'Y' here if you want your kernel to support the
++          Compex WPJ558 board.
+ 
+ config ATH79_MACH_DIR_505_A1
+ 	bool "D-Link DIR-505-A1 support"
+--- a/arch/mips/ath79/Makefile
++++ b/arch/mips/ath79/Makefile
+@@ -134,6 +134,7 @@ obj-$(CONFIG_ATH79_MACH_WNR2200)	+= mach
+ obj-$(CONFIG_ATH79_MACH_WP543)		+= mach-wp543.o
+ obj-$(CONFIG_ATH79_MACH_WPE72)		+= mach-wpe72.o
+ obj-$(CONFIG_ATH79_MACH_WPJ344)		+= mach-wpj344.o
++obj-$(CONFIG_ATH79_MACH_WPJ558)         += mach-wpj558.o
+ obj-$(CONFIG_ATH79_MACH_WRT160NL)	+= mach-wrt160nl.o
+ obj-$(CONFIG_ATH79_MACH_WRT400N)	+= mach-wrt400n.o
+ obj-$(CONFIG_ATH79_MACH_WZR_HP_G300NH)	+= mach-wzr-hp-g300nh.o
+--- a/arch/mips/ath79/machtypes.h
++++ b/arch/mips/ath79/machtypes.h
+@@ -176,6 +176,7 @@ enum ath79_mach_type {
+ 	ATH79_MACH_WP543,		/* Compex WP543 */
+ 	ATH79_MACH_WPE72,		/* Compex WPE72 */
+ 	ATH79_MACH_WPJ344,		/* Compex WPJ344 */
++        ATH79_MACH_WPJ558,              /* Compex WPJ558 */
+ 	ATH79_MACH_WRT160NL,		/* Linksys WRT160NL */
+ 	ATH79_MACH_WRT400N,		/* Linksys WRT400N */
+ 	ATH79_MACH_WZR_HP_AG300H,	/* Buffalo WZR-HP-AG300H */

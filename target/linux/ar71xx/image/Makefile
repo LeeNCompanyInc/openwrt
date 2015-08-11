@@ -27,6 +27,10 @@ define sysupname
 $(call imgname,$(1),$(2))-sysupgrade.bin
 endef
 
+define FirmwareVersion
+$(eval FIRMWAREVERSION := $(shell cat $(TARGET_DIR)/etc/openwrt_release | sed -nr "s/DISTRIB_DESCRIPTION=\"(.*)\"/\1/p"))
+endef
+
 define factoryname
 $(call imgname,$(1),$(2))-factory.bin
 endef
@@ -73,6 +77,20 @@ LOADER_MAKE := $(NO_TRACE_MAKE) -C lzma-loader KDIR=$(KDIR)
 KDIR_TMP:=$(KDIR)/tmp
 VMLINUX:=$(BIN_DIR)/$(IMG_PREFIX)-vmlinux
 UIMAGE:=$(BIN_DIR)/$(IMG_PREFIX)-uImage
+fs_squash:=squashfs-only
+fs_64k:=64k
+fs_64kraw:=64kraw
+fs_128k:=128k
+fs_256k:=256k
+ifeq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),y)
+	fs_squash:=initramfs
+	fs_64k:=initramfs
+	fs_64kraw:=initramfs
+	fs_128k:=initramfs
+	fs_256k:=initramfs
+	VMLINUX:=$(BIN_DIR)/$(IMG_PREFIX)-vmlinux-initramfs
+	UIMAGE:=$(BIN_DIR)/$(IMG_PREFIX)-uImage-initramfs
+endif
 
 # $(1): input file.
 # $(2): output file.
@@ -263,6 +281,14 @@ cameo_db120_mtdlayout_8M=mtdparts=spi0.0:64k(uboot)ro,64k(nvram)ro,7872k(firmwar
 cap4200ag_mtdlayout=mtdparts=spi0.0:256k(u-boot),64k(u-boot-env),320k(custom)ro,1536k(kernel),12096k(rootfs),2048k(failsafe),64k(art),13632k@0xa0000(firmware)
 eap300v2_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env),320k(custom),13632k(firmware),2048k(failsafe),64k(art)ro
 db120_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6336k(rootfs),1408k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
+wpj342_8m_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6336k(rootfs),1408k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
+wpj342_16m_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,1536k(kernel),14528k(rootfs),64k(nvram),64k(art)ro,16064k@0x30000(firmware)
+wpj344_8m_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6336k(rootfs),1408k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
+wpj344_16m_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,1536k(kernel),14528k(rootfs),64k(nvram),64k(art)ro,16064k@0x30000(firmware)
+wpj558_8m_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6336k(rootfs),1408k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
+wpj558_16m_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,1536k(kernel),14528k(rootfs),64k(nvram),64k(art)ro,16064k@0x30000(firmware)
+wpj531_8m_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6336k(rootfs),1408k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
+wpj531_16m_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,1536k(kernel),14528k(rootfs),64k(nvram),64k(art)ro,16064k@0x30000(firmware)
 cameo_ap94_mtdlayout=mtdparts=spi0.0:256k(uboot)ro,64k(config)ro,6208k(firmware),64k(caldata)ro,1600k(unknown)ro,64k@0x7f0000(caldata_copy)
 cameo_ap94_mtdlayout_fat=mtdparts=spi0.0:256k(uboot)ro,64k(config)ro,7808k(firmware),64k(caldata)ro,64k@0x660000(caldata_orig),6208k@0x50000(firmware_orig)
 esr900_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,64k(u-boot-env)ro,1408k(kernel),13248k(rootfs),1024k(manufacture)ro,64k(backup)ro,320k(storage)ro,64k(caldata)ro,14656k@0x40000(firmware)
@@ -1018,6 +1044,92 @@ define Jffs2Template
   endef
 endef
 
+define CpxwrtImageParams
+      ifeq ($(1),14876672)
+	      FSIZE=1000000
+	      IVER=16M
+	      KSTART=30000
+	      RSTART=1b0000
+	      P1START=fe0000
+	      P2START=ff0000
+      else
+	      FSIZE=800000
+	      IVER=8M
+	      KSTART=680000
+	      RSTART=50000
+	      P1START=7e0000
+	      P2START=7f0000
+      endif
+endef
+
+define Image/Build/CpxwrtWPJ342
+	  $(call MkuImageLzma,$(2),$(3) $(4))
+	  $(call FirmwareVersion)
+	  $(eval $(call CpxwrtImageParams,$(6)))
+	  $(STAGING_DIR_HOST)/bin/mkmylofw -B WPE72 -i 0x11f6:0x689:0x11f6:0x689 -s 0x$(FSIZE) \
+                 -p0x$(KSTART):$(5):al:0x80060000:"$(FIRMWAREVERSION)":$(KDIR_TMP)/vmlinux-$(2).uImage \
+                 -p0x$(RSTART):$(6):::rootfs:$(KDIR)/root.$(1) \
+                 -p0x$(P1START):0x010000 \
+                 -p0x$(P2START):0x010000 \
+	  $(call imgname,$(1),$(2))-$(IVER)-factory.img
+endef
+
+define Image/Build/CpxwrtWPJ342/initramfs
+	  $(call PatchKernelLzma,$(2),$(3) $(4))
+	  cp $(KDIR_TMP)/vmlinux-$(2) $(call imgname,initramfs,$(2)).bin
+endef
+
+define Image/Build/CpxwrtWPJ344
+	  $(call MkuImageLzma,$(2),$(3) $(4))
+	  $(call FirmwareVersion)
+	  $(eval $(call CpxwrtImageParams,$(6)))
+	  $(STAGING_DIR_HOST)/bin/mkmylofw -B WPE72 -i 0x11f6:0x687:0x11f6:0x687 -s 0x$(FSIZE) \
+		  -p0x$(KSTART):$(5):al:0x80060000:"$(FIRMWAREVERSION)":$(KDIR_TMP)/vmlinux-$(2).uImage \
+		  -p0x$(RSTART):$(6):::rootfs:$(KDIR)/root.$(1) \
+		  -p0x$(P1START):0x010000 \
+		  -p0x$(P2START):0x010000 \
+	  $(call imgname,$(1),$(2))-$(IVER)-factory.img
+endef
+
+define Image/Build/CpxwrtWPJ344/initramfs
+	  $(call PatchKernelLzma,$(2),$(3) $(4))
+	  cp $(KDIR_TMP)/vmlinux-$(2) $(call imgname,initramfs,$(2)).bin
+endef
+
+define Image/Build/CpxwrtWPJ558
+	  $(call MkuImageLzma,$(2),$(3) $(4))
+	  $(call FirmwareVersion)
+	  $(eval $(call CpxwrtImageParams,$(6)))
+	  $(STAGING_DIR_HOST)/bin/mkmylofw -B WPE72 -i 0x11f6:0x688:0x11f6:0x688 -s 0x$(FSIZE) \
+		  -p0x$(KSTART):$(5):al:0x80060000:"$(FIRMWAREVERSION)":$(KDIR_TMP)/vmlinux-$(2).uImage \
+		  -p0x$(RSTART):$(6):::rootfs:$(KDIR)/root.$(1) \
+		  -p0x$(P1START):0x010000 \
+		  -p0x$(P2START):0x010000 \
+	  $(call imgname,$(1),$(2))-$(IVER)-factory.img
+endef
+
+define Image/Build/CpxwrtWPJ558/initramfs
+	$(call PatchKernelLzma,$(2),$(3) $(4))
+	cp $(KDIR_TMP)/vmlinux-$(2) $(call imgname,initramfs,$(2)).bin
+endef
+
+define Image/Build/CpxwrtWPJ531
+	  $(call MkuImageLzma,$(2),$(3) $(4))
+	  $(call FirmwareVersion)
+	  $(eval $(call CpxwrtImageParams,$(6)))
+	  $(STAGING_DIR_HOST)/bin/mkmylofw -B WPE72 -i  0x11f6:0x68A:0x11f6:0x68A -s 0x$(FSIZE) \
+		  -p0x$(KSTART):$(5):al:0x80060000:"$(FIRMWAREVERSION)":$(KDIR_TMP)/vmlinux-$(2).uImage \
+		  -p0x$(RSTART):$(6):::rootfs:$(KDIR)/root.$(1) \
+		  -p0x$(P1START):0x010000 \
+		  -p0x$(P2START):0x010000 \
+	  $(call imgname,$(1),$(2))-$(IVER)-factory.img
+endef
+
+define Image/Build/CpxwrtWPJ531/initramfs
+	$(call PatchKernelLzma,$(2),$(3) $(4))
+	cp $(KDIR_TMP)/vmlinux-$(2) $(call imgname,initramfs,$(2)).bin
+endef
+
 # $(1): template name to be defined.
 # $(2): squashfs suffix to be used.
 # $(3): jffs2 suffix to be used.
@@ -1126,6 +1238,14 @@ $(eval $(call SingleProfile,MyLoader,64k,WP543_16M,wp543,,ttyS0,115200,0x1000000
 $(eval $(call SingleProfile,MyLoader,64k,WPE72_4M,wpe72,,ttyS0,115200,0x400000,4M))
 $(eval $(call SingleProfile,MyLoader,64k,WPE72_8M,wpe72,,ttyS0,115200,0x800000,8M))
 $(eval $(call SingleProfile,MyLoader,64k,WPE72_16M,wpe72,,ttyS0,115200,0x1000000,16M))
+$(eval $(call SingleProfile,CpxwrtWPJ342,$(fs_64k),WPJ342_8M,wpj342,WPJ342,ttyS0,115200,$$(wpj342_8m_mtdlayout),1441792,6488064,RKuImage))
+$(eval $(call SingleProfile,CpxwrtWPJ342,$(fs_64k),WPJ342_16M,wpj342,WPJ342,ttyS0,115200,$$(wpj342_16m_mtdlayout),1572864,14876672,RKuImage))
+$(eval $(call SingleProfile,CpxwrtWPJ344,$(fs_64k),WPJ344_8M,wpj344,WPJ344,ttyS0,115200,$$(wpj344_8m_mtdlayout),1441792,6488064,RKuImage))
+$(eval $(call SingleProfile,CpxwrtWPJ344,$(fs_64k),WPJ344_16M,wpj344,WPJ344,ttyS0,115200,$$(wpj344_16m_mtdlayout),1572864,14876672,RKuImage))
+$(eval $(call SingleProfile,CpxwrtWPJ558,$(fs_64k),WPJ558_8M,wpj558,WPJ558,ttyS0,115200,$$(wpj558_8m_mtdlayout),1441792,6488064,RKuImage))
+$(eval $(call SingleProfile,CpxwrtWPJ558,$(fs_64k),WPJ558_16M,wpj558,WPJ558,ttyS0,115200,$$(wpj558_16m_mtdlayout),1572864,14876672,RKuImage))
+$(eval $(call SingleProfile,CpxwrtWPJ531,$(fs_64k),WPJ531_8M,wpj531,WPJ531,ttyS0,115200,$$(wpj531_8m_mtdlayout),1441792,6488064,RKuImage))
+$(eval $(call SingleProfile,CpxwrtWPJ531,$(fs_64k),WPJ531_16M,wpj531,WPJ531,ttyS0,115200,$$(wpj531_16m_mtdlayout),1572864,14876672,RKuImage))
 
 $(eval $(call SingleProfile,Netgear,64kraw,WNR2000V3,wnr2000v3,WNR2000V3,ttyS0,115200,$$(wnr2000v3_mtdlayout),0x32303033,WNR2000V3,"" NA,))
 $(eval $(call SingleProfile,Netgear,64kraw,WNR2200,wnr2200,WNR2200,ttyS0,115200,$$(wnr2200_mtdlayout),0x32323030,WNR2200,"" NA,))
@@ -1298,6 +1418,10 @@ $(eval $(call MultiProfile,WNDR3700,WNDR3700V1 WNDR3700V2 WNDR3800 WNDR3800CH WN
 $(eval $(call MultiProfile,WNR612V2,REALWNR612V2 N150R))
 $(eval $(call MultiProfile,WP543,WP543_2M WP543_4M WP543_8M WP543_16M))
 $(eval $(call MultiProfile,WPE72,WPE72_4M WPE72_8M WPE72_16M))
+$(eval $(call MultiProfile,WPJ342,WPJ342_8M WPJ342_16M))
+$(eval $(call MultiProfile,WPJ344,WPJ344_8M WPJ344_16M))
+$(eval $(call MultiProfile,WPJ558,WPJ558_8M WPJ558_16M))
+$(eval $(call MultiProfile,WPJ531,WPJ531_8M WPJ531_16M))
 
 $(eval $(call MultiProfile,Minimal,$(SINGLE_PROFILES)))
 $(eval $(call MultiProfile,Madwifi,EAP7660D UBNTRS UBNTRSPRO UBNTLSSR71 WP543))
