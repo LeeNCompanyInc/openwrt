@@ -1,0 +1,22 @@
+/dts-v1/;
+
+/include/ "ArcherC2.dtsi"
+
+/ {
+	compatible = "ralink,mt7620a-soc";
+	model = "TP-Link Archer C2";
+
+	palmbus@10000000 {
+		spi@b00 {
+			m25p80@0 {
+				compatible = "s25fl064k";
+			};
+		};
+	};
+
+	rtl8366rb {
+		compatible = "rtl8367rb";
+		gpio-sda = <&gpio0 1 0>;
+		gpio-sck = <&gpio0 2 0>;
+	};
+};

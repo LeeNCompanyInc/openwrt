@@ -158,6 +158,8 @@ platform_check_image() {
 		}
 		return 0
 		;;
+	c2|\
+	c20|\
 	c20i)
 		[ "$magic" != "03000000" ] && {
 			echo "Invalid image type."

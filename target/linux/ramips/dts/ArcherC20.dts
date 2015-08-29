@@ -4,5 +4,5 @@
 
 / {
 	compatible = "ralink,mt7620a-soc";
-	model = "TP-Link Archer C20i";
+	model = "TP-Link Archer C20";
 };
