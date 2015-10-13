@@ -3,7 +3,7 @@
 /include/ "ArcherC2.dtsi"
 
 / {
-	compatible = "ralink,mt7620a-soc";
+	compatible = "tplink,c2", "ralink,mt7620a-soc";
 	model = "TP-Link Archer C2";
 
 	palmbus@10000000 {

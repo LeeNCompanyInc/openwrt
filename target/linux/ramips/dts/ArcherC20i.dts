@@ -3,6 +3,6 @@
 /include/ "ArcherC2.dtsi"
 
 / {
-	compatible = "ralink,mt7620a-soc";
+	compatible = "tplink,c20i", "ralink,mt7620a-soc";
 	model = "TP-Link Archer C20i";
 };
