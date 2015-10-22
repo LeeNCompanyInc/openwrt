@@ -39,7 +39,8 @@ $(eval $(call Require,case-sensitive-fs, \
 ))
 
 define Require/getopt
-	getopt --help 2>&1 | grep long >/dev/null
+	getopt --help 2>&1 | grep long >/dev/null || \
+	/usr/local/opt/gnu-getopt/bin/getopt --help 2>&1 | grep long >/dev/null
 endef
 $(eval $(call Require,getopt, \
 	Please install GNU getopt \
