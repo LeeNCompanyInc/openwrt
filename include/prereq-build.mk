@@ -105,6 +105,10 @@ $(eval $(call SetupHostCommand,cp,Please install GNU fileutils, \
 	gcp --help, \
 	cp --help))
 
+$(eval $(call SetupHostCommand,date,Please install GNU coreutils, \
+	gdate --help, \
+	date --help))
+
 $(eval $(call SetupHostCommand,seq,, \
 	gseq --version, \
 	seq --version))
