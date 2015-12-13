@@ -76,6 +76,10 @@ broadway)
 	set_usb_led "$board:red:diskmounted"
 	set_wifi_led "$board:red:wps_active"
 	;;
+c2)
+	ucidef_set_led_netdev "lan" "lan" "$board:green:lan" eth0.1
+	set_usb_led "$board:green:usb"
+	;;
 cf-wr800n)
 	ucidef_set_led_netdev "lan" "lan" "$board:white:ethernet" eth0.1
 	set_wifi_led "$board:white:wifi"

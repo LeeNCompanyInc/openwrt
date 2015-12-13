@@ -74,11 +74,10 @@
 	};
 
 	ethernet@10100000 {
-		pinctrl-names = "default";
-		pinctrl-0 = <&ephy_pins>;
-
 		mtd-mac-address = <&rom 0xf100>;
-		ralink,port-map = "wllll";
+		port@0 {
+			ralink,fixed-link = <1000 1 1 1>;
+		};
 	};
 
 	ehci@101c0000 {
@@ -89,12 +88,7 @@
 		status = "okay";
 	};
 
-	gsw@10110000 {
-		ralink,port4 = "ephy";
-	};
-
 	wmac@10180000 {
-		ralink,5ghz = <0>;
 		ralink,mtd-eeprom = <&radio 0>;
 	};
 
@@ -113,8 +107,8 @@
 
 	rtl8367b {
 		compatible = "realtek,rtl8367b";
-		gpio-sda = <&gpio0 42 0>;
-		gpio-sck = <&gpio0 43 0>;
+		gpio-sda = <&gpio0 24 0>;
+		gpio-sck = <&gpio0 25 0>;
 		realtek,extif1 = <1 0 1 1 1 1 1 1 2>;
 	};
 
