@@ -463,6 +463,9 @@ ar71xx_board_detect() {
 	*"dLAN pro 1200+ WiFi ac")
 		name="dlan-pro-1200-ac"
 		;;
+	*DR344)
+		name="dr344"
+		;;
 	*"Dragino v2")
 		name="dragino2"
 		;;
@@ -547,6 +550,9 @@ ar71xx_board_detect() {
 		;;
 	*MR16)
 		name="mr16"
+		;;
+	*MR18)
+		name="mr18"
 		;;
 	*MR600v2)
 		name="mr600v2"

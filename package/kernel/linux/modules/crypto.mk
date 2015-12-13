@@ -27,7 +27,7 @@ define KernelPackage/crypto-aead
 	CONFIG_CRYPTO_AEAD2
   FILES:=$(LINUX_DIR)/crypto/aead.ko
   AUTOLOAD:=$(call AutoLoad,09,aead,1)
-  $(call AddDepends/crypto, +LINUX_4_4:kmod-crypto-null)
+  $(call AddDepends/crypto, +LINUX_4_3:kmod-crypto-null +LINUX_4_4:kmod-crypto-null)
 endef
 
 $(eval $(call KernelPackage,crypto-aead))
@@ -100,6 +100,7 @@ $(eval $(call KernelPackage,crypto-wq))
 
 define KernelPackage/crypto-rng
   TITLE:=CryptoAPI random number generation
+  DEPENDS:=+kmod-crypto-hash
   KCONFIG:= \
 	CONFIG_CRYPTO_DRBG \
 	CONFIG_CRYPTO_JITTERENTROPY \

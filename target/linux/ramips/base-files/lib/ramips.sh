@@ -358,6 +358,9 @@ ramips_board_detect() {
 	*"TEW-692GR")
 		name="tew-692gr"
 		;;
+	*"UBNT-ERX")
+		name="ubnt-erx"
+		;;
 	*"UR-326N4G")
 		name="ur-326n4g"
 		;;
@@ -400,12 +403,15 @@ ramips_board_detect() {
 	*"WHR-G300N")
 		name="whr-g300n"
 		;;
+	*"WiTi")
+                name="witi"
+		;;
 	*"WIZARD 8800")
 		name="wizard8800"
 		;;
 	*"WizFi630A")
 		name="wizfi630a"
-		;;                
+		;;
 	*"WL-330N")
 		name="wl-330n"
 		;;
