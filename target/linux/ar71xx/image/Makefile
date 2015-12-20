@@ -212,7 +212,6 @@ define Device/gl-domino
 endef
 TARGET_DEVICES += gl-domino
 
-
 define Device/wndr3700
   BOARDNAME = WNDR3700
   NETGEAR_KERNEL_MAGIC = 0x33373030
@@ -391,6 +390,60 @@ define Device/tl-wdr7500-v3
     TPLINK_HWID := 0x75000003
 endef
 TARGET_DEVICES += archer-c5-v1 archer-c7-v1 archer-c7-v2 tl-wdr7500-v3
+
+define Device/cap324
+  BOARDNAME := CAP324
+  DEVICE_PROFILE := CAP324
+  IMAGE_SIZE = 15296k
+  MTDPARTS = spi0.0:256k(u-boot),64k(u-boot-env)ro,15296k(firmware),640k(certs),64k(nvram),64k(art)
+endef
+
+TARGET_DEVICES += cap324
+
+define Device/cap324-nocloud
+  BOARDNAME := CAP324
+  DEVICE_PROFILE := CAP324
+  IMAGE_SIZE = 16000k
+  MTDPARTS = spi0.0:256k(u-boot),64k(u-boot-env)ro,16000k(firmware),64k(art)
+endef
+
+TARGET_DEVICES += cap324-nocloud
+
+define Device/cr3000
+  BOARDNAME := CR3000
+  DEVICE_PROFILE := CR3000
+  IMAGE_SIZE = 7104k
+  MTDPARTS = spi0.0:256k(u-boot),64k(u-boot-env)ro,7104k(firmware),640k(certs),64k(nvram),64k(art)
+endef
+
+TARGET_DEVICES += cr3000
+
+define Device/cr3000-nocloud
+  BOARDNAME := CR3000
+  DEVICE_PROFILE := CR3000
+  IMAGE_SIZE = 7808k
+  MTDPARTS = spi0.0:256k(u-boot),64k(u-boot-env)ro,7808k(firmware),64k(art)
+endef
+
+TARGET_DEVICES += cr3000-nocloud
+
+define Device/cr5000
+  BOARDNAME := CR5000
+  DEVICE_PROFILE := CR5000
+  IMAGE_SIZE = 7104k
+  MTDPARTS = spi0.0:256k(u-boot),64k(u-boot-env)ro,7104k(firmware),640k(certs),64k(nvram),64k(art)
+endef
+
+TARGET_DEVICES += cr5000
+
+define Device/cr5000-nocloud
+  BOARDNAME := CR5000
+  DEVICE_PROFILE := CR5000
+  IMAGE_SIZE = 7808k
+  MTDPARTS = spi0.0:256k(u-boot),64k(u-boot-env)ro,7808k(firmware),64k(art)
+endef
+
+TARGET_DEVICES += cr5000-nocloud
 
 define Device/antminer-s1
     $(Device/tplink-8mlzma)
@@ -1460,7 +1513,6 @@ define Build/Clean
 	$(LOADER_MAKE) clean
 endef
 
-
 alfa_ap96_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,256k(u-boot-env)ro,13312k(rootfs),2048k(kernel),512k(caldata)ro,15360k@0x80000(firmware)
 alfa_mtdlayout_8M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6144k(rootfs),1600k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
 alfa_mtdlayout_16M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,15936k(firmware),64k(nvram),64k(art)ro
@@ -1528,6 +1580,7 @@ wnr2200_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,7808k(firmwar
 wnr2000v3_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,3712k(firmware),64k(art)ro
 wnr2000v4_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,64k(u-boot-env)ro,3776k(firmware),64k(art)ro
 r6100_mtdlayout=mtdparts=ar934x-nfc:128k(u-boot)ro,256k(caldata),256k(caldata-backup),512k(config),512k(pot),2048k(kernel),122240k(ubi),25600k@0x1a0000(firmware),2048k(language),3072k(traffic_meter)
+tew823dru_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,64k(nvram)ro,15296k(firmware),192k(lang)ro,512k(my-dlink)ro,64k(mac)ro,64k(art)ro
 wndr4300_mtdlayout=mtdparts=ar934x-nfc:256k(u-boot)ro,256k(u-boot-env)ro,256k(caldata),512k(pot),2048k(language),512k(config),3072k(traffic_meter),2048k(kernel),23552k(ubi),25600k@0x6c0000(firmware),256k(caldata_backup),-(reserved)
 zcn1523h_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6208k(rootfs),1472k(kernel),64k(configure)ro,64k(mfg)ro,64k(art)ro,7680k@0x50000(firmware)
 mynet_n600_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,64k(devdata)ro,64k(devconf)ro,15872k(firmware),64k(radiocfg)ro
@@ -2332,6 +2385,7 @@ $(eval $(call SingleProfile,CameoAP121,64kraw-nojffs,DIR601B1,dir-601-b1,TEW-712
 $(eval $(call SingleProfile,CameoAP121_8M,64kraw-nojffs,DIR505A1,dir-505-a1,DIR-505-A1,ttyATH0,115200,"HORNET-PACKET-DIR505A1-3",1.99.99,""))
 
 $(eval $(call SingleProfile,CameoAP135,64kraw,DGL5500A1,dgl-5500-a1,DGL-5500-A1,ttyS0,115200,$$(dgl_5500_mtdlayout),"00AP135AR9558-RT-130508-00"))
+$(eval $(call SingleProfile,CameoAP135,64kraw,TEW823DRU,tew-823dru,TEW-823DRU,ttyS0,115200,$$(tew823dru_mtdlayout) mem=256M,"00AP135AR9558-RT-131129-00"))
 
 $(eval $(call SingleProfile,CameoDB120,64kraw,DHP1565A1,dhp-1565-a1,DHP-1565-A1,ttyS0,115200,"00DB120AR9344-RT-101214-00"))
 $(eval $(call SingleProfile,CameoDB120,64kraw,DIR825C1,dir-825-c1,DIR-825-C1,ttyS0,115200,"00DB120AR9344-RT-101214-00"))

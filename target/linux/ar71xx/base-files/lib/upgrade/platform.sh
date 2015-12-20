@@ -167,7 +167,10 @@ platform_check_image() {
 	case "$board" in
 	all0315n | \
 	all0258n | \
-	cap4200ag)
+	cap324 | \
+	cap4200ag | \
+	cr3000 |\
+	cr5000)
 		platform_check_image_allnet "$1" && return 0
 		return 1
 		;;
@@ -231,6 +234,7 @@ platform_check_image() {
 	tew-632brp | \
 	tew-712br | \
 	tew-732br | \
+	tew-823dru | \
 	wrt400n | \
 	airgateway | \
 	airgatewaypro | \

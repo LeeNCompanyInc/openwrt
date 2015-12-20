@@ -27,7 +27,7 @@
 			m25p80@0 {
 				#address-cells = <1>;
 				#size-cells = <1>;
-				compatible = "m25p80";
+				compatible = "jedec,spi-nor";
 				reg = <1>;
 				linux,modalias = "m25p80";
 				spi-max-frequency = <10000000>;
@@ -42,12 +42,7 @@
 	};
 
 	nand@1e003000 {
-		compatible = "mtk,mt7621-nand";
-		bank-width = <2>;
-		reg = <0x1e003000 0x800
-		       0x1e003800 0x800>;
-		#address-cells = <1>;
-		#size-cells = <1>;
+		status = "okay";
 
 		partition@0 {
 			label = "u-boot";
