@@ -32,6 +32,7 @@ KERNEL_LOADADDR := $(loadaddr-y)
 
 KERNEL_DTB = kernel-bin | patch-dtb | lzma
 define Device/Default
+  KERNEL_DEPENDS = $$(wildcard ../dts/$$(DTS).dts)
   KERNEL := $(KERNEL_DTB) | uImage lzma
   IMAGES := sysupgrade.bin
   IMAGE_SIZE := $(ralink_default_fw_size_8M)
@@ -76,10 +77,10 @@ define Build/ubnt-erx-factory-compat
 endef
 
 define Build/ubnt-erx-factory-kernel
-	if [ -e $(BIN_DIR)/$(KERNEL_INITRAMFS_IMAGE) ]; then \
-		$(TAR) -rf $@ --transform='s/^.*/vmlinux.tmp/' $(BIN_DIR)/$(KERNEL_INITRAMFS_IMAGE); \
+	if [ -e $(KDIR)/tmp/$(KERNEL_INITRAMFS_IMAGE) ]; then \
+		$(TAR) -rf $@ --transform='s/^.*/vmlinux.tmp/' $(KDIR)/tmp/$(KERNEL_INITRAMFS_IMAGE); \
 		\
-		md5sum --binary $(BIN_DIR)/$(KERNEL_INITRAMFS_IMAGE) | awk '{print $$1}'> $@.md5; \
+		md5sum --binary $(KDIR)/tmp/$(KERNEL_INITRAMFS_IMAGE) | awk '{print $$1}'> $@.md5; \
 		$(TAR) -rf $@ --transform='s/^.*/vmlinux.tmp.md5/' $@.md5; \
 		$(RM) $@.md5; \
 	fi
@@ -1079,7 +1080,7 @@ define Device/ubnt-erx
   FILESYSTEMS := squashfs
   KERNEL_SIZE := 3145728
   KERNEL := $(KERNEL_DTB) | uImage lzma
-  IMAGES := sysupgrade.tar factory-initramfs.tar
+  IMAGES := sysupgrade.tar $(if $(CONFIG_TARGET_ROOTFS_INITRAMFS),factory-initramfs.tar)
   IMAGE/factory-initramfs.tar := ubnt-erx-factory-compat | \
 				 ubnt-erx-factory-kernel | \
 				 ubnt-erx-factory-rootfs | \
