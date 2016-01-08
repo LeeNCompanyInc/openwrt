@@ -17,8 +17,8 @@ try_svn() {
 }
 
 try_git() {
-	[ -d .git ] || return 1
-	REV="$(git log | grep -m 1 git-svn-id | awk '{ gsub(/.*@/, "", $0); print $1 }')"
+	[ -e .git ] || return 1
+	REV="$(git log --pretty | grep -m 1 'git-svn-id:' | awk '{ gsub(/.*@/, "", $0); print $1 }')"
 	REV="${REV:+r$REV}"
 	[ -n "$REV" ]
 }
