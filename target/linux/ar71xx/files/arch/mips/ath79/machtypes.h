@@ -17,6 +17,7 @@
 enum ath79_mach_type {
 	ATH79_MACH_GENERIC_OF = -1,	/* Device tree board */
 	ATH79_MACH_GENERIC = 0,
+	ATH79_MACH_ALFA_AP120C,		/* ALFA Network AP120C board */
 	ATH79_MACH_ALFA_AP96,		/* ALFA Network AP96 board */
 	ATH79_MACH_ALFA_NX,		/* ALFA Network N2/N5 board */
 	ATH79_MACH_ALL0258N,		/* Allnet ALL0258N */
@@ -114,6 +115,7 @@ enum ath79_mach_type {
 	ATH79_MACH_OM2P,		/* OpenMesh OM2P */
 	ATH79_MACH_OM5P_AN,		/* OpenMesh OM5P-AN */
 	ATH79_MACH_OM5P,		/* OpenMesh OM5P */
+	ATH79_MACH_OMY_X1,		/* OMYlink OMY-X1 */
 	ATH79_MACH_ONION_OMEGA,		/* ONION OMEGA */
 	ATH79_MACH_PB42,		/* Atheros PB42 */
 	ATH79_MACH_PB92,		/* Atheros PB92 */
@@ -144,6 +146,7 @@ enum ath79_mach_type {
 	ATH79_MACH_RB_SXTLITE5ND,	/* Mikrotik RouterBOARD SXT Lite 5nD */
 	ATH79_MACH_RW2458N,		/* Redwave RW2458N */
 	ATH79_MACH_SMART_300,		/* NC-LINK SMART-300 */
+	ATH79_MACH_TELLSTICK_ZNET_LITE,	/* TellStick ZNet Lite */
 	ATH79_MACH_TEW_632BRP,		/* TRENDnet TEW-632BRP */
 	ATH79_MACH_TEW_673GRU,		/* TRENDnet TEW-673GRU */
 	ATH79_MACH_TEW_712BR,		/* TRENDnet TEW-712BR */

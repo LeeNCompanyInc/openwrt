@@ -68,6 +68,7 @@ ramips_setup_interfaces()
 	firewrt|\
 	hlk-rm04|\
 	miwifi-mini|\
+	miwifi-nano|\
 	mt7621|\
 	mt7628|\
 	mzk-750dhp|\
@@ -114,7 +115,14 @@ ramips_setup_interfaces()
 	dir-860l-b1|\
 	f5d8235-v1|\
 	f5d8235-v2|\
+	gl-mt300a|\
+	gl-mt300n|\
+	gl-mt750|\
 	hg255d|\
+	mzk-wdpr|\
+	jhr-n805r|\
+	jhr-n825r|\
+	jhr-n926r|\
 	rt-n14u|\
 	ubnt-erx|\
 	ur-326n4g|\

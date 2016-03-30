@@ -4,7 +4,7 @@
 
 / {
 	compatible = "zbtlink,zbt-we826", "ralink,mt7620a-soc";
-	model = "Zbtlink ZBT-WE826";
+       model = "ZBT-WE826";
 
 	chosen {
 		bootargs = "console=ttyS0,115200";
@@ -20,7 +20,6 @@
 		gpio0: gpio@600 {
 			status = "okay";
 		};
-		
 		gpio1: gpio@638 {
 			status = "okay";
 		};
@@ -32,7 +31,7 @@
 		spi@b00 {
 			status = "okay";
 
-			m25p80@0 {
+                       en25q128@0 {
 				#address-cells = <1>;
 				#size-cells = <1>;
 				compatible = "w25q128";
@@ -66,15 +65,15 @@
 		};
 	};
 
-	ehci@101c0000 {
+       sdhci@10130000 {
 		status = "okay";
 	};
 
-	ohci@101c1000 {
+       ehci@101c0000 {
 		status = "okay";
 	};
 
-	sdhci@10130000 {
+       ohci@101c1000 {
 		status = "okay";
 	};
 
@@ -84,16 +83,15 @@
 
 	ethernet@10100000 {
 		mtd-mac-address = <&factory 0x4>;
-		ralink,port-map = "llllw";
+               ralink,port-map = "wllll";
 	};
-	
 	wmac@10180000 {
 		ralink,mtd-eeprom = <&factory 0>;
 	};
 
 	pinctrl {
 		state_default: pinctrl0 {
-			gpio {
+                       default {
 				ralink,group ="i2c", "uartf", "wled", "spi refclk", "pa";
 				ralink,function = "gpio";
 			};
@@ -107,29 +105,33 @@
 	gpio-leds {
 		compatible = "gpio-leds";
 		power {
-			label = "zbt-we826:blue:power";
-			gpios = <&gpio1 14 1>;
-		};
-		wlan {
-			label = "zbt-we826:blue:wlan";
-			gpios = <&gpio3 0 1>;
-		};
-		wps {
-			label = "zbt-we826:blue:wps";
-			gpios = <&gpio1 15 0>;
+                       label = "zbt-we826:green:power";
+                       gpios = <&gpio1 14 0>;
+               };
+               usb {
+                       label = "zbt-we826:green:usb";
+                       gpios = <&gpio1 15 0>;
+               };
+               air {
+                       label = "zbt-we826:green:wifi";
+                       gpios = <&gpio3 0 1>;
 		};
 	};
 
 	gpio-keys-polled {
-		compatible = "gpio-keys";
+               compatible = "gpio-keys-polled";
 		#address-cells = <1>;
 		#size-cells = <0>;
 		poll-interval = <20>;
 
 		reset {
 			label = "reset";
-			gpios = <&gpio0 13 0>;
-			linux,code = <0x101>;
+                       gpios = <&gpio0 1 1>;
+                       linux,code = <0x198>;
 		};
 	};
+
+       pcie@10140000 {
+               status = "okay";
+       };
 };
