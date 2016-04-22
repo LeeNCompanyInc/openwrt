@@ -1,7 +1,7 @@
-From 2ff725af8a512481d68ebd7f8ad122b1c98f3fad Mon Sep 17 00:00:00 2001
+From 97478bae3a11b5e87d61b88267e915f7c5ddf4e9 Mon Sep 17 00:00:00 2001
 From: John Crispin <blogic@openwrt.org>
 Date: Wed, 6 Jan 2016 21:55:10 +0100
-Subject: [PATCH 24/66] dt-bindings: add MediaTek PCIe binding documentation
+Subject: [PATCH 24/81] dt-bindings: add MediaTek PCIe binding documentation
 
 Signed-off-by: John Crispin <blogic@openwrt.org>
 ---
@@ -10,9 +10,6 @@ Signed-off-by: John Crispin <blogic@openwrt.org>
  2 files changed, 152 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/pci/mediatek-pcie.txt
 
-diff --git a/Documentation/devicetree/bindings/pci/mediatek-pcie.txt b/Documentation/devicetree/bindings/pci/mediatek-pcie.txt
-new file mode 100644
-index 0000000..8fea3ed
 --- /dev/null
 +++ b/Documentation/devicetree/bindings/pci/mediatek-pcie.txt
 @@ -0,0 +1,140 @@
@@ -156,11 +153,9 @@ index 0000000..8fea3ed
 +			status = "okay";
 +		};
 +	};
-diff --git a/arch/arm/boot/dts/mt7623.dtsi b/arch/arm/boot/dts/mt7623.dtsi
-index 1ba7790..ec19283 100644
 --- a/arch/arm/boot/dts/mt7623.dtsi
 +++ b/arch/arm/boot/dts/mt7623.dtsi
-@@ -291,6 +291,18 @@
+@@ -292,6 +292,18 @@
  		status = "disabled";
  	};
  
@@ -179,6 +174,3 @@ index 1ba7790..ec19283 100644
  	mmc0: mmc@11230000 {
  		compatible = "mediatek,mt7623-mmc",
  			     "mediatek,mt8135-mmc";
--- 
-1.7.10.4
-

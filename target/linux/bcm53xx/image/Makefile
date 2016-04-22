@@ -37,6 +37,7 @@ endef
 define Build/trx-serial
 	$(STAGING_DIR_HOST)/bin/trx \
 		-o $@ \
+		-m 33554432 \
 		-f $(word 1,$^) -a 1024 \
 		-f $(KDIR)/root.squashfs -a 0x10000 -A $(KDIR)/fs_mark
 endef
@@ -177,6 +178,7 @@ $(eval $(call AsusDevice,rt-n18u,RT-N18U))
 $(eval $(call DLinkDevice,dir-885l,wrgac42_dlink.2015_dir885l))
 $(eval $(call LinksysDevice,ea6300-v1))
 $(eval $(call NetgearDevice,r7000,U12H270T00_NETGEAR))
+$(eval $(call NetgearDevice,r7900,U12H315T30_NETGEAR))
 # $(eval $(call NetgearDevice,r8500,U12H334T00_NETGEAR))
 
 $(eval $(call BuildImage))
