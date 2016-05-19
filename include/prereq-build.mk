@@ -191,3 +191,12 @@ $(eval $(call Require,getopt-extended, \
 $(eval $(call RequireCommand,file, \
 	Please install the 'file' package. \
 ))
+
+define Require/gettext
+	msgfmt --help >/dev/null || \
+	/usr/local/bin/msgfmt --help >/dev/null
+endef
+
+$(eval $(call Require,gettext, \
+	Please install GNU gettext \
+))
