@@ -517,7 +517,14 @@ define Device/tl-wr847n-v8
     DEVICE_PROFILE := TLWR841
     TPLINK_HWID := 0x08470008
 endef
-TARGET_DEVICES += tl-wr841-v1.5 tl-wr841-v3 tl-wr841-v5 tl-wr841-v7 tl-wr841-v8 tl-wr841-v9 tl-wr841-v10 tl-wr841-v11 tl-wr842n-v1 tl-wr842n-v2 tl-wr842n-v3 tl-wr843nd-v1 tl-wr847n-v8
+
+define Device/tl-wr847n-v9
+    $(Device/tplink-4mlzma)
+    BOARDNAME := TL-WR841N-v9
+    DEVICE_PROFILE := TLWR841
+    TPLINK_HWID := 0x08410009
+endef
+TARGET_DEVICES += tl-wr841-v1.5 tl-wr841-v3 tl-wr841-v5 tl-wr841-v7 tl-wr841-v8 tl-wr841-v9 tl-wr841-v10 tl-wr841-v11 tl-wr842n-v1 tl-wr842n-v2 tl-wr842n-v3 tl-wr843nd-v1 tl-wr847n-v8 tl-wr847-v9
 
 define Device/tl-wr941nd-v2
     $(Device/tplink-4m)
