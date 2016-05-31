@@ -295,6 +295,25 @@ define uboot/vgv7510kw22_ram
   DEPS:=@TARGET_lantiq_xrx200_VGV7510KW22NOR||@TARGET_lantiq_xrx200_VGV7510KW22BRN
 endef
 
+define uboot/vgv7519_brn
+  TITLE:=U-Boot for Arcadyan VGV7519 (BRN)
+  SOC:=vr9
+  DEPS:=@TARGET_lantiq_xrx200_VGV7519NOR||@TARGET_lantiq_xrx200_VGV7519BRN
+endef
+
+define uboot/vgv7519_nor
+  TITLE:=U-Boot for Arcadyan VGV7519 (NOR)
+  SOC:=vr9
+  DEPS:=@TARGET_lantiq_xrx200_VGV7519NOR||@TARGET_lantiq_xrx200_VGV7519BRN
+endef
+
+define uboot/vgv7519_ram
+  TITLE:=U-Boot for Arcadyan VGV7519 (RAM)
+  SOC:=vr9
+  DDR_SETTINGS:=board/arcadyan/vgv7519/ddr_settings.h
+  DEPS:=@TARGET_lantiq_xrx200_VGV7519NOR||@TARGET_lantiq_xrx200_VGV7519BRN
+endef
+
 UBOOTS:= \
 	arv4519pw_ram arv4519pw_nor arv4519pw_brn \
 	arv7510pw_ram arv7510pw_nor arv7510pw_brn \
@@ -302,14 +321,15 @@ UBOOTS:= \
 	arv7518pw_ram arv7518pw_nor arv7518pw_brn \
 	arv752dpw_ram arv752dpw_nor arv752dpw_brn \
 	arv752dpw22_ram arv752dpw22_nor arv752dpw22_brn \
-        arv8539pw22_brn arv8539pw22_nor arv8539pw22_ram \
+	arv8539pw22_brn arv8539pw22_nor arv8539pw22_ram \
 	gigasx76x_ram gigasx76x_nor \
 	acmp252_ram acmp252_nor \
 	easy50712_ram easy50712_nor easy50712_norspl \
 	easy80920_ram easy80920_nor easy80920_norspl easy80920_sfspl \
 	fb3370_eva fb3370_ram fb3370_sfspl \
 	p2812hnufx_ram p2812hnufx_nandspl \
-	vgv7510kw22_brn vgv7510kw22_nor vgv7510kw22_ram
+	vgv7510kw22_brn vgv7510kw22_nor vgv7510kw22_ram \
+	vgv7519_brn vgv7519_nor vgv7519_ram
 
 define Package/uboot/template
 define Package/uboot-lantiq-$(1)
@@ -330,18 +350,19 @@ define BuildUBootPackage
 	$(call Package/uboot/template,$(1),$(TITLE),$(DEPS))
 endef
 
-define CopyVR9Firmware
-	$(CP) $(FIRMWARE_LANTIQ_SOURCE)/vr9_phy$(1)_a$(2)x.bin \
+define CompressVR9Firmware
+	$(STAGING_DIR_HOST)/bin/lzma e \
+		$(FIRMWARE_LANTIQ_SOURCE)/vr9_phy$(1)_a$(2)x.bin \
 		$(PKG_BUILD_DIR)/arch/mips/cpu/mips32/vrx200/fw_phy$(1)_a$(2)x.blob
 endef
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
 	mkdir -p $(PKG_BUILD_DIR)/arch/mips/cpu/mips32/vrx200/
-	$(call CopyVR9Firmware,11g,1)
-	$(call CopyVR9Firmware,11g,2)
-	$(call CopyVR9Firmware,22f,1)
-	$(call CopyVR9Firmware,22f,2)
+	$(call CompressVR9Firmware,11g,1)
+	$(call CompressVR9Firmware,11g,2)
+	$(call CompressVR9Firmware,22f,1)
+	$(call CompressVR9Firmware,22f,2)
 endef
 
 define Build/Configure

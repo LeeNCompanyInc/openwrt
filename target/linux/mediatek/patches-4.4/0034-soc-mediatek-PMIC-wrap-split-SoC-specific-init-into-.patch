@@ -1,8 +1,8 @@
-From b164dff8be266b531574e89a27eb3ce9e0b4e40a Mon Sep 17 00:00:00 2001
+From a1bbd630710d5da89a9c347c84d7badd30e7e68a Mon Sep 17 00:00:00 2001
 From: John Crispin <blogic@openwrt.org>
 Date: Wed, 20 Jan 2016 10:12:00 +0100
-Subject: [PATCH 34/90] soc: mediatek: PMIC wrap: split SoC specific init into
- callback
+Subject: [PATCH 034/102] soc: mediatek: PMIC wrap: split SoC specific init
+ into callback
 
 This patch moves the SoC specific wrapper init code into separate callback
 to avoid pwrap_init() getting too large. This is done by adding a new

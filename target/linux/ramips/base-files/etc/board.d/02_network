@@ -35,6 +35,7 @@ ramips_setup_interfaces()
 	case $board in
 	3g150b|\
 	3g300m|\
+	a5-v11|\
 	all0256n|\
 	all5002|\
 	all5003|\
@@ -44,13 +45,15 @@ ramips_setup_interfaces()
 	ht-tm02|\
 	linkits7688 | \
 	linkits7688d | \
+	m2m|\
 	microwrt|\
+	mpr-a2|\
 	ncs601w|\
 	w150m|\
 	wnce2001|\
 	zte-q7)
 		ucidef_add_switch "switch0"
-		ucidef_add_switch_attr "switch0" "reset" "false"
+		ucidef_add_switch_attr "switch0" "enable" "false"
 		ucidef_set_interface_lan "eth0"
 		;;
 	3g-6200nl|\
@@ -77,6 +80,7 @@ ramips_setup_interfaces()
 	pbr-m1|\
 	psg1208|\
 	sap-g3200u3|\
+	sk-wb8|\
 	wf-2881|\
 	whr-300hp2|\
 	whr-600d|\
@@ -91,10 +95,6 @@ ramips_setup_interfaces()
 	youku-yk1)
 		ucidef_add_switch "switch0" \
 			"0:lan" "1:lan" "2:lan" "3:lan" "4:wan" "6@eth0"
-		;;
-	a5-v11)
-		ucidef_add_switch "switch0" \
-			"0:lan" "6t@eth0"
 		;;
 	ar670w|\
 	ar725w|\
@@ -112,7 +112,6 @@ ramips_setup_interfaces()
 	atp-52b|\
 	awm002-evb|\
 	awm003-evb|\
-	c2 | \
 	dir-645|\
 	dir-860l-b1|\
 	f5d8235-v1|\
@@ -166,6 +165,7 @@ ramips_setup_interfaces()
 	d105|\
 	hpm|\
 	mzk-ex300np|\
+	mzk-ex750np|\
 	na930|\
 	wli-tx4-ag300n|\
 	wrh-300cr)
@@ -180,11 +180,6 @@ ramips_setup_interfaces()
 	y1s)
 		ucidef_add_switch "switch0" \
 			"1:lan" "2:lan" "3:lan" "4:lan" "5:lan" "0:wan" "6@eth0"
-		;;
-	m2m)
-		ucidef_add_switch "switch0"
-		ucidef_add_switch_attr "switch0" "reset" "false"
-		ucidef_set_interface_lan "eth0"
 		;;
 	mlwg2|\
 	wizard8800|\
@@ -247,6 +242,16 @@ ramips_setup_macs()
 
 	case $board in
 	a5-v11|\
+	ht-tm02)
+		lan_mac=$(cat /sys/class/net/eth0/address)
+		;;
+	all0239-3g|\
+	carambola|\
+	freestation5|\
+	w502u|\
+	wnce2001)
+		wan_mac=$(mtd_get_mac_binary factory 46)
+		;;
 	bc2|\
 	broadway|\
 	d105|\
@@ -257,7 +262,6 @@ ramips_setup_macs()
 	freestation5|\
 	hlk-rm04|\
 	mpr-a1|\
-	mpr-a2|\
 	psr-680w|\
 	sl-r7205|\
 	y1|\
@@ -265,13 +269,6 @@ ramips_setup_macs()
 		lan_mac=$(cat /sys/class/net/eth0/address)
 		lan_mac=$(macaddr_setbit_la "$lan_mac")
 		wan_mac=$(macaddr_add "$lan_mac" 1)
-		;;
-	all0239-3g|\
-	carambola|\
-	freestation5|\
-	w502u|\
-	wnce2001)
-		wan_mac=$(mtd_get_mac_binary factory 46)
 		;;
 	br-6475nd)
 		lan_mac=$(cat /sys/class/net/eth0/address)
@@ -290,9 +287,6 @@ ramips_setup_macs()
 		[ -n "$lan_mac" ] || lan_mac=$(cat /sys/class/net/eth0/address)
 		wan_mac=$(macaddr_add "$lan_mac" 1)
 		;;
-	ht-tm02)
-		lan_mac=$(cat /sys/class/net/eth0/address)
-		;;
 	linkits7688 | \
 	linkits7688d)
 		wan_mac=$(mtd_get_mac_binary factory 4)
@@ -305,10 +299,6 @@ ramips_setup_macs()
 		lan_mac=$(cat /sys/class/net/eth0/address)
 		lan_mac=$(macaddr_add "$lan_mac" -2)
 		;;
-	miwifi-mini)
-		wan_mac=$(mtd_get_mac_binary factory 28)
-		lan_mac=$(mtd_get_mac_binary factory 4)
-		;;
 	oy-0001)
 		lan_mac=$(mtd_get_mac_binary factory 40)
 		wan_mac=$(mtd_get_mac_binary factory 46)
@@ -317,6 +307,9 @@ ramips_setup_macs()
 		lan_mac=$(cat /sys/class/net/eth0/address)
 		lan_mac=$(macaddr_setbit_la "$lan_mac")
 		wan_mac=$(mtd_get_mac_binary factory 32772)
+		;;
+	sk-wb8)
+		wan_mac=$(mtd_get_mac_binary factory 57350)
 		;;
 	tew-691gr)
 		lan_mac=$(cat /sys/class/net/eth0/address)

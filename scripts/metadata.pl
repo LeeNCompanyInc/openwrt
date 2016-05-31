@@ -282,15 +282,12 @@ EOF
 
 	foreach my $target (@target) {
 		my $profiles = $target->{profiles};
-
-		foreach my $profile (@$profiles) {
+		foreach my $profile (@{$target->{profiles}}) {
 			print <<EOF;
 config TARGET_$target->{conf}_$profile->{id}
 	bool "$profile->{name}"
 	depends on TARGET_$target->{conf}
-$profile->{config}
 EOF
-			$profile->{kconfig} and print "\tselect PROFILE_KCONFIG\n";
 			my @pkglist = merge_package_lists($target->{packages}, $profile->{packages});
 			foreach my $pkg (@pkglist) {
 				print "\tselect DEFAULT_$pkg\n";
@@ -321,6 +318,30 @@ EOF
 		$target->{subtarget} or	print "\t\tdefault \"".$target->{board}."\" if TARGET_".$target->{conf}."\n";
 	}
 	print <<EOF;
+config TARGET_SUBTARGET
+	string
+	default "generic" if !HAS_SUBTARGETS
+
+EOF
+
+	foreach my $target (@target) {
+		foreach my $subtarget (@{$target->{subtargets}}) {
+			print "\t\tdefault \"$subtarget\" if TARGET_".$target->{conf}."_$subtarget\n";
+		}
+	}
+	print <<EOF;
+config TARGET_PROFILE
+	string
+EOF
+	foreach my $target (@target) {
+		my $profiles = $target->{profiles};
+		foreach my $profile (@$profiles) {
+			print "\tdefault \"$profile->{id}\" if TARGET_$target->{conf}_$profile->{id}\n";
+		}
+	}
+
+	print <<EOF;
+
 config TARGET_ARCH_PACKAGES
 	string
 	
@@ -445,27 +466,37 @@ sub mconf_depends {
 			$depend = $2;
 		}
 		next if $package{$depend} and $package{$depend}->{buildonly};
-		if ($vdep = $package{$depend}->{vdepends}) {
-			$depend = join("||", map { "PACKAGE_".$_ } @$vdep);
-		} else {
-			$flags =~ /\+/ and do {
-				# Menuconfig will not treat 'select FOO' as a real dependency
-				# thus if FOO depends on other config options, these dependencies
-				# will not be checked. To fix this, we simply emit all of FOO's
-				# depends here as well.
-				$package{$depend} and push @t_depends, [ $package{$depend}->{depends}, $condition ];
-
-				$m = "select";
-				next if $only_dep;
-			};
-			$flags =~ /@/ or $depend = "PACKAGE_$depend";
-			if ($condition) {
-				if ($m =~ /select/) {
-					next if $depend eq $condition;
-					$depend = "$depend if $condition";
-				} else {
-					$depend = "!($condition) || $depend" unless $dep->{$condition} eq 'select';
+		if ($flags =~ /\+/) {
+			if ($vdep = $package{$depend}->{vdepends}) {
+				my @vdeps = @$vdep;
+				$depend = shift @vdeps;
+				if (@vdeps > 1) {
+					$condition = '!('.join("||", map { "PACKAGE_".$_ } @vdeps).')';
+				} elsif (@vdeps > 0) {
+					$condition = '!PACKAGE_'.$vdeps[0];
 				}
+			}
+
+			# Menuconfig will not treat 'select FOO' as a real dependency
+			# thus if FOO depends on other config options, these dependencies
+			# will not be checked. To fix this, we simply emit all of FOO's
+			# depends here as well.
+			$package{$depend} and push @t_depends, [ $package{$depend}->{depends}, $condition ];
+
+			$m = "select";
+			next if $only_dep;
+		} else {
+			if ($vdep = $package{$depend}->{vdepends}) {
+				$depend = join("||", map { "PACKAGE_".$_ } @$vdep);
+			}
+		}
+		$flags =~ /@/ or $depend = "PACKAGE_$depend";
+		if ($condition) {
+			if ($m =~ /select/) {
+				next if $depend eq $condition;
+				$depend = "$depend if $condition";
+			} else {
+				$depend = "!($condition) || $depend" unless $dep->{$condition} eq 'select';
 			}
 		}
 		$dep->{$depend} =~ /select/ or $dep->{$depend} = $m;
@@ -546,11 +577,14 @@ sub print_package_config_category($) {
 			print "\t\t".($pkg->{tristate} ? 'tristate' : 'bool')." $title\n";
 			print "\t\tdefault y if DEFAULT_".$pkg->{name}."\n";
 			unless ($pkg->{hidden}) {
-				if ($pkg->{name} =~ /^kmod-/) {
-					$pkg->{default} ||= "m if ALL_KMODS";
-				} else {
-					$pkg->{default} ||= "m if ALL";
+				my @def = ("ALL");
+				if (!exists($pkg->{repository})) {
+					push @def, "ALL_NONSHARED";
 				}
+				if ($pkg->{name} =~ /^kmod-/) {
+					push @def, "ALL_KMODS";
+				}
+				$pkg->{default} ||= "m if " . join("||", @def);
 			}
 			if ($pkg->{default}) {
 				foreach my $default (split /\s*,\s*/, $pkg->{default}) {
@@ -837,8 +871,8 @@ sub gen_package_subdirs() {
 	parse_package_metadata($ARGV[0]) or exit 1;
 	foreach my $name (sort {uc($a) cmp uc($b)} keys %package) {
 		my $pkg = $package{$name};
-		if ($pkg->{name} && $pkg->{package_subdir}) {
-			print "Package/$name/subdir = $pkg->{package_subdir}\n";
+		if ($pkg->{name} && $pkg->{repository}) {
+			print "Package/$name/subdir = $pkg->{repository}\n";
 		}
 	}
 }
@@ -871,11 +905,26 @@ sub gen_version_filtered_list() {
 	}
 }
 
+sub gen_profile_mk() {
+	my $file = shift @ARGV;
+	my $target = shift @ARGV;
+	my @targets = parse_target_metadata($file);
+	foreach my $cur (@targets) {
+		next unless $cur->{id} eq $target;
+		print "PROFILE_NAMES = ".join(" ", map { $_->{id} } @{$cur->{profiles}})."\n";
+		foreach my $profile (@{$cur->{profiles}}) {
+			print $profile->{id}.'_NAME:='.$profile->{name}."\n";
+			print $profile->{id}.'_PACKAGES:='.join(' ', @{$profile->{packages}})."\n";
+		}
+	}
+}
+
 sub parse_command() {
 	GetOptions("ignore=s", \@ignore);
 	my $cmd = shift @ARGV;
 	for ($cmd) {
 		/^target_config$/ and return gen_target_config();
+		/^profile_mk$/ and return gen_profile_mk();
 		/^package_mk$/ and return gen_package_mk();
 		/^package_config$/ and return gen_package_config();
 		/^kconfig/ and return gen_kconfig_overrides();
@@ -888,6 +937,7 @@ sub parse_command() {
 	print <<EOF
 Available Commands:
 	$0 target_config [file] 		Target metadata in Kconfig format
+	$0 profile_mk [file] [target]		Profile metadata in makefile format
 	$0 package_mk [file]			Package metadata in makefile format
 	$0 package_config [file] 		Package metadata in Kconfig format
 	$0 kconfig [file] [config] [patchver]	Kernel config overrides

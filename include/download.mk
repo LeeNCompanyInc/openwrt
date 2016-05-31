@@ -1,11 +1,13 @@
 #
 # Copyright (C) 2006-2012 OpenWrt.org
+# Copyright (C) 2016 LEDE project
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
 
 OPENWRT_GIT = http://git.openwrt.org
+LEDE_GIT = http://git.lede-project.org
 
 DOWNLOAD_RDEP=$(STAMP_PREPARED) $(HOST_STAMP_PREPARED)
 

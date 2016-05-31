@@ -446,7 +446,11 @@ ar71xx_board_detect() {
 	*"COMFAST CF-E316N v2")
 		name="cf-e316n-v2"
 		;;
-	*"CPE210/220/510/520")
+	*"CPE210/220")
+		name="cpe210"
+		tplink_pharos_board_detect
+		;;
+	*"CPE510/520")
 		name="cpe510"
 		tplink_pharos_board_detect
 		;;
@@ -595,6 +599,9 @@ ar71xx_board_detect() {
 	*MR1750)
 		name="mr1750"
 		;;
+	*MR1750v2)
+		name="mr1750v2"
+		;;
 	*MR600)
 		name="mr600"
 		;;
@@ -639,6 +646,9 @@ ar71xx_board_detect() {
 		;;
 	*"OM2P HSv2")
 		name="om2p-hsv2"
+		;;
+	*"OM2P HSv3")
+		name="om2p-hsv3"
 		;;
 	*"OM2P LC")
 		name="om2p-lc"
@@ -910,6 +920,9 @@ ar71xx_board_detect() {
 	*"TL-WR842N/ND v2")
 		name="tl-wr842n-v2"
 		;;
+	*"TL-WR842N/ND v3")
+		name="tl-wr842n-v3"
+		;;
 	*TL-WR941ND)
 		name="tl-wr941nd"
 		;;
@@ -927,6 +940,9 @@ ar71xx_board_detect() {
 		;;
 	*"TL-WR720N"*)
 		name="tl-wr720n-v3"
+		;;
+	*"TL-WR810N")
+		name="tl-wr810n"
 		;;
 	*"TL-MR10U")
 		name="tl-mr10u"
@@ -946,8 +962,11 @@ ar71xx_board_detect() {
 	*UniFi)
 		name="unifi"
 		;;
-	*"UniFi-AC")
-		name="unifiac"
+	*"UniFi-AC-LITE")
+		name="unifiac-lite"
+		;;
+	*"UniFi-AC-PRO")
+		name="unifiac-pro"
 		;;
 	*"UniFi AP Pro")
 		name="uap-pro"

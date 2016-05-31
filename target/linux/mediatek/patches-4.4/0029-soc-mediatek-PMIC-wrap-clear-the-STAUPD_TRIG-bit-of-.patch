@@ -1,8 +1,8 @@
-From 4fbf092b199a344abe60528732c712ec3b22aa67 Mon Sep 17 00:00:00 2001
+From b92861fbc79b3a7a9bc1c51e2dbfa2c191cc27ea Mon Sep 17 00:00:00 2001
 From: Henry Chen <henryc.chen@mediatek.com>
 Date: Thu, 21 Jan 2016 19:04:00 +0800
-Subject: [PATCH 29/90] soc: mediatek: PMIC wrap: clear the STAUPD_TRIG bit of
- WDT_SRC_EN
+Subject: [PATCH 029/102] soc: mediatek: PMIC wrap: clear the STAUPD_TRIG bit
+ of WDT_SRC_EN
 
 Since STAUPD interrupts aren't handled on mt8173, disable watchdog timeout
 monitor of STAUPD to avoid WDT_INT triggered by STAUPD.

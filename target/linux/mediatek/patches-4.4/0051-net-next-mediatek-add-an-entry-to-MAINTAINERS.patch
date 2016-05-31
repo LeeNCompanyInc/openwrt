@@ -1,7 +1,7 @@
-From 859c0e3dfcc227b6f3fd324ef2ea5fa22cfc7f17 Mon Sep 17 00:00:00 2001
+From 514e4ce65a5f1b5bfa3cbca153f672844f093f0e Mon Sep 17 00:00:00 2001
 From: John Crispin <blogic@openwrt.org>
 Date: Wed, 2 Mar 2016 04:34:04 +0100
-Subject: [PATCH 51/90] net-next: mediatek: add an entry to MAINTAINERS
+Subject: [PATCH 051/102] net-next: mediatek: add an entry to MAINTAINERS
 
 Add myself and Felix as the Maintainers for the MediaTek ethernet driver.
 
@@ -12,10 +12,10 @@ Signed-off-by: John Crispin <blogic@openwrt.org>
  1 file changed, 7 insertions(+)
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 156e1d3..7737042 100644
+index 233f834..73f0592 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -6908,6 +6908,13 @@ F:	include/uapi/linux/meye.h
+@@ -6902,6 +6902,13 @@ F:	include/uapi/linux/meye.h
  F:	include/uapi/linux/ivtv*
  F:	include/uapi/linux/uvcvideo.h
  

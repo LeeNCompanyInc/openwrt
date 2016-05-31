@@ -143,6 +143,7 @@ generate_switch_vlans_ports() {
 	# autogenerate vlans
 	#
 
+	if json_is_a roles array; then
 	json_get_keys roles roles
 	json_select roles
 
@@ -160,12 +161,14 @@ generate_switch_vlans_ports() {
 	done
 
 	json_select ..
+	fi
 
 
 	#
 	# write port specific settings
 	#
 
+	if json_is_a ports array; then
 	json_get_keys ports ports
 	json_select ports
 
@@ -192,6 +195,7 @@ generate_switch_vlans_ports() {
 	done
 
 	json_select ..
+	fi
 }
 
 generate_switch() {

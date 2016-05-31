@@ -1,6 +1,6 @@
-This is the buildsystem for the OpenWrt Linux distribution.
+This is the buildsystem for the LEDE Linux distribution.
 
-Please use "make menuconfig" to configure your appreciated
+Please use "make menuconfig" to choose your preferred
 configuration for the toolchain and firmware.
 
 You need to have installed gcc, binutils, bzip2, flex, python, perl, make,
@@ -29,7 +29,7 @@ the lack of case sensitiveness in the file system.
 
 
 Sunshine!
-	Your OpenWrt Project
-	http://openwrt.org
+	Your LEDE Community
+	http://www.lede-project.org
 
 

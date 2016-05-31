@@ -18,7 +18,7 @@ try_svn() {
 
 try_git() {
 	git rev-parse --git-dir >/dev/null 2>&1 || return 1
-	REV="$(git log --pretty | grep -m 1 'git-svn-id:' | awk '{ gsub(/.*@/, "", $0); print $1 }')"
+	REV="$(git describe --match reboot | sed "s/reboot-\([0-9]*\)-.*/\1/g")"
 	REV="${REV:+r$REV}"
 	[ -n "$REV" ]
 }
@@ -26,9 +26,9 @@ try_git() {
 try_hg() {
 	[ -d .hg ] || return 1
 	REV="$(hg log -r-1 --template '{desc}' | awk '{print $2}' | sed 's/\].*//')"
-	REV="${REV:+$REV}"
+	REV="${REV:+r$REV}"
 	[ -n "$REV" ]
 }
 
-try_version || try_svn || try_git || try_hg || REV="unknown"
+try_version || try_git || try_hg || REV="unknown"
 echo "$REV"

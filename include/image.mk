@@ -18,7 +18,7 @@ KDIR=$(KERNEL_BUILD_DIR)
 KDIR_TMP=$(KDIR)/tmp
 DTS_DIR:=$(LINUX_DIR)/arch/$(LINUX_KARCH)/boot/dts
 
-sanitize = $(call tolower,$(subst _,-,$(1)))
+sanitize = $(call tolower,$(subst _,-,$(subst $(space),-,$(1))))
 
 DIST_SANITIZED:=$(call sanitize,$(VERSION_DIST))
 EXTRA_NAME_SANITIZED=$(call sanitize,$(EXTRA_IMAGE_NAME))
@@ -76,6 +76,7 @@ fs-types-$(CONFIG_TARGET_ROOTFS_JFFS2) += $(addprefix jffs2-,$(JFFS2_BLOCKSIZE))
 fs-types-$(CONFIG_TARGET_ROOTFS_JFFS2_NAND) += $(addprefix jffs2-nand-,$(NAND_BLOCKSIZE))
 fs-types-$(CONFIG_TARGET_ROOTFS_EXT4FS) += ext4
 fs-types-$(CONFIG_TARGET_ROOTFS_ISO) += iso
+fs-types-$(CONFIG_TARGET_ROOTFS_UBIFS) += ubifs
 fs-subtypes-$(CONFIG_TARGET_ROOTFS_JFFS2) += $(addsuffix -raw,$(addprefix jffs2-,$(JFFS2_BLOCKSIZE)))
 fs-subtypes-$(CONFIG_TARGET_ROOTFS_CPIOGZ) += cpiogz
 fs-subtypes-$(CONFIG_TARGET_ROOTFS_TARGZ) += targz
@@ -120,7 +121,7 @@ endef
 
 define Image/BuildKernel/MkuImage
 	mkimage -A $(ARCH) -O linux -T kernel -C $(1) -a $(2) -e $(3) \
-		-n '$(call toupper,$(ARCH)) OpenWrt Linux-$(LINUX_VERSION)' -d $(4) $(5)
+		-n '$(call toupper,$(ARCH)) LEDE Linux-$(LINUX_VERSION)' -d $(4) $(5)
 endef
 
 define Image/BuildKernel/MkFIT
@@ -303,7 +304,7 @@ define Build/uImage
 	mkimage -A $(LINUX_KARCH) \
 		-O linux -T kernel \
 		-C $(1) -a $(KERNEL_LOADADDR) -e $(if $(KERNEL_ENTRY),$(KERNEL_ENTRY),$(KERNEL_LOADADDR)) \
-		-n '$(call toupper,$(LINUX_KARCH)) OpenWrt Linux-$(LINUX_VERSION)' -d $@ $@.new
+		-n '$(call toupper,$(LINUX_KARCH)) LEDE Linux-$(LINUX_VERSION)' -d $@ $@.new
 	@mv $@.new $@
 endef
 
@@ -318,11 +319,23 @@ endef
 
 define Build/netgear-dni
 	$(STAGING_DIR_HOST)/bin/mkdniimg \
-		-B $(NETGEAR_BOARD_ID) -v OpenWrt.$(REVISION) \
+		-B $(NETGEAR_BOARD_ID) -v LEDE.$(REVISION) \
 		$(if $(NETGEAR_HW_ID),-H $(NETGEAR_HW_ID)) \
 		-r "$(1)" \
 		-i $@ -o $@.new
 	mv $@.new $@
+endef
+
+define Build/tplink-safeloader
+       -$(STAGING_DIR_HOST)/bin/tplink-safeloader \
+		-B $(TPLINK_BOARD_NAME) \
+		-V $(REVISION) \
+		-k $(word 1,$^) \
+		-r $@ \
+		-o $@.new \
+		-j \
+		$(wordlist 2,$(words $(1)),$(1)) \
+		$(if $(findstring sysupgrade,$(word 1,$(1))),-S) && mv $@.new $@ || rm -f $@
 endef
 
 define Build/fit
@@ -439,6 +452,9 @@ endef
 define Device/Init
   PROFILES := $(PROFILE)
   DEVICE_NAME := $(1)
+  DEVICE_TITLE :=
+  DEVICE_PACKAGES :=
+  DEVICE_DESCRIPTION = Build firmware images for $$(DEVICE_TITLE)
   KERNEL:=
   KERNEL_INITRAMFS = $$(KERNEL)
   KERNEL_SIZE:=
@@ -469,9 +485,18 @@ define Device/Export
   $(1) : FILESYSTEM:=$(2)
 endef
 
+ifdef IB
+  DEVICE_CHECK_PROFILE = $(filter $(1),$(PROFILE))
+else
+  DEVICE_CHECK_PROFILE = $(CONFIG_TARGET_$(call target_conf,$(BOARD)$(if $(SUBTARGET),_$(SUBTARGET)))_$(1))
+endif
+
 define Device/Check
-  _TARGET = $$(if $$(filter $(PROFILE),$$(PROFILES)),install,install-disabled)
-  _COMPILE_TARGET = $$(if $(if $(IB),,$(CONFIG_IB)$$(filter $(PROFILE),$$(PROFILES))),compile,compile-disabled)
+  _PROFILE_SET = $$(strip $$(foreach profile,$$(PROFILES) DEVICE_$(1),$$(call DEVICE_CHECK_PROFILE,$$(profile))))
+  _TARGET := $$(if $$(_PROFILE_SET),install,install-disabled)
+  ifndef IB
+    _COMPILE_TARGET := $$(if $(CONFIG_IB)$$(_PROFILE_SET),compile,compile-disabled)
+  endif
 endef
 
 ifndef IB
@@ -548,16 +573,36 @@ define Device/Build
       $$(call Device/Build/image,$$(fs),$$(image),$(1)))))
 endef
 
+define Device/DumpInfo
+Target-Profile: DEVICE_$(1)
+Target-Profile-Name: $(DEVICE_TITLE)
+Target-Profile-Packages: $(DEVICE_PACKAGES)
+Target-Profile-Description:
+$(DEVICE_DESCRIPTION)
+@@
+
+endef
+
+define Device/Dump
+$$(eval $$(if $$(DEVICE_TITLE),$$(info $$(call Device/DumpInfo,$(1)))))
+endef
+
 define Device
   $(call Device/Init,$(1))
   $(call Device/Default,$(1))
-  $(call Device/Check,$(1))
   $(call Device/$(1),$(1))
-  $(call Device/Build,$(1))
+  $(call Device/Check,$(1))
+  $(call Device/$(if $(DUMP),Dump,Build),$(1))
 
 endef
 
 define BuildImage
+
+  ifneq ($(DUMP),)
+    all: dumpinfo
+    dumpinfo: FORCE
+	@true
+  endif
 
   download:
   prepare:
@@ -574,11 +619,11 @@ define BuildImage
 		$(call Build/Clean)
 
     image_prepare: compile
-		mkdir -p $(KDIR)/tmp
+		mkdir -p $(BIN_DIR) $(KDIR)/tmp
 		$(call Image/Prepare)
   else
     image_prepare:
-		mkdir -p $(KDIR)/tmp
+		mkdir -p $(BIN_DIR) $(KDIR)/tmp
   endif
 
   mkfs_prepare: image_prepare

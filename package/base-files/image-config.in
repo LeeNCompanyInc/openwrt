@@ -24,13 +24,24 @@ config TARGET_PREINIT_SUPPRESS_STDERR
 		the ash shell launched by inittab will display stderr).  That's
 		the same behaviour as seen in previous version of OpenWrt.
 
+config TARGET_PREINIT_DISABLE_FAILSAFE
+	bool
+	prompt "Disable failsafe" if PREINITOPT
+	default n
+	help
+		Disable failsafe mode.  While it is very handy while
+		experimenting or developing it really ought to be
+		disabled in production environments as it is a major
+		security loophole.
+
 config TARGET_PREINIT_TIMEOUT
 	int
-	prompt "Failsafe wait timeout" if PREINITOPT
+	prompt "Failsafe/Debug wait timeout" if PREINITOPT
 	default 2
 	help
-		How long to wait for failsafe mode to be entered before
-		continuing with a regular boot if failsafe not selected.
+		How long to wait for failsafe mode to be entered or for
+		a debug option to be pressed before continuing with a
+		regular boot.
 
 config TARGET_PREINIT_SHOW_NETMSG
 	bool
@@ -45,7 +56,7 @@ config TARGET_PREINIT_SHOW_NETMSG
 
 config TARGET_PREINIT_SUPPRESS_FAILSAFE_NETMSG
 	bool
-	prompt "Suppress network message indicating failsafe" if PREINITOPT
+	prompt "Suppress network message indicating failsafe" if ( PREINITOPT && !TARGET_PREINIT_SHOW_NETMSG && !TARGET_PREINIT_DISABLE_FAILSAFE )
 	default n
 	help
 		If "Show all preinit network messages" above is not set, then
@@ -147,7 +158,7 @@ if VERSIONOPT
 	config VERSION_DIST
 		string
 		prompt "Release distribution"
-		default "OpenWrt"
+		default "Lede"
 		help
 			This is the name of the release distribution.
 			If unspecified, it defaults to OpenWrt.
@@ -170,23 +181,24 @@ if VERSIONOPT
 	config VERSION_REPO
 		string
 		prompt "Release repository"
-		default "http://downloads.openwrt.org/snapshots/trunk/%S/packages"
+		default "http://downloads.lede-project.org/snapshots"
 		help
 			This is the repository address embedded in the image, it defaults
 			to the trunk snapshot repo; the url may contain the following placeholders:
 			 %R .. Revision number
 			 %V .. Release version or revision number, uppercase
 			 %v .. Release version or revision number, lowercase
-			 %C .. Release version or "Bleeding Edge", uppercase
-			 %c .. Release version or "bleeding_edge", lowercase
+			 %C .. Release version or "HEAD", uppercase
+			 %c .. Release version or "head", lowercase
 			 %N .. Release name, uppercase
 			 %n .. Release name, lowercase
-			 %D .. Distribution name or "OpenWrt", uppercase
-			 %d .. Distribution name or "openwrt", lowercase
+			 %D .. Distribution name or "Lede", uppercase
+			 %d .. Distribution name or "lede", lowercase
 			 %T .. Target name
 			 %S .. Target/Subtarget name
+			 %A .. Package architecture
 			 %t .. Build taint flags, e.g. "no-all busybox"
-			 %M .. Manufacturer name or "OpenWrt"
+			 %M .. Manufacturer name or "Lede"
 			 %P .. Product name or "Generic"
 			 %h .. Hardware revision or "v0"
 

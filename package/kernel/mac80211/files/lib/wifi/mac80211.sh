@@ -123,7 +123,7 @@ config wifi-iface
 	option device   radio$devidx
 	option network  lan
 	option mode     ap
-	option ssid     OpenWrt
+	option ssid     LEDE
 	option encryption none
 
 EOF

@@ -68,7 +68,6 @@ sub parse_target_metadata($) {
 			}
 		};
 		/^Target-Name:\s*(.+)\s*$/ and $target->{name} = $1;
-		/^Target-Path:\s*(.+)\s*$/ and $target->{path} = $1;
 		/^Target-Arch:\s*(.+)\s*$/ and $target->{arch} = $1;
 		/^Target-Arch-Packages:\s*(.+)\s*$/ and $target->{arch_packages} = $1;
 		/^Target-Features:\s*(.+)\s*$/ and $target->{features} = [ split(/\s+/, $1) ];
@@ -85,15 +84,18 @@ sub parse_target_metadata($) {
 			$profile = {
 				id => $1,
 				name => $1,
+				priority => 999,
 				packages => []
 			};
 			push @{$target->{profiles}}, $profile;
 		};
 		/^Target-Profile-Name:\s*(.+)\s*$/ and $profile->{name} = $1;
+		/^Target-Profile-Priority:\s*(\d+)\s*$/ and do {
+			$profile->{priority} = $1;
+			$target->{sort} = 1;
+		};
 		/^Target-Profile-Packages:\s*(.*)\s*$/ and $profile->{packages} = [ split(/\s+/, $1) ];
 		/^Target-Profile-Description:\s*(.*)\s*/ and $profile->{desc} = get_multiline(*FILE);
-		/^Target-Profile-Config:/ and $profile->{config} = get_multiline(*FILE, "\t");
-		/^Target-Profile-Kconfig:/ and $profile->{kconfig} = 1;
 	}
 	close FILE;
 	foreach my $target (@target) {
@@ -108,6 +110,11 @@ sub parse_target_metadata($) {
 				packages => []
 			}
 		];
+
+		$target->{sort} and @{$target->{profiles}} = sort {
+			$a->{priority} <=> $b->{priority} or
+			$a->{name} cmp $b->{name};
+		} @{$target->{profiles}};
 	}
 	return @target;
 }
@@ -222,7 +229,7 @@ sub parse_package_metadata($) {
 		/^Build-Depends: \s*(.+)\s*$/ and $pkg->{builddepends} = [ split /\s+/, $1 ];
 		/^Build-Depends\/(\w+): \s*(.+)\s*$/ and $pkg->{"builddepends/$1"} = [ split /\s+/, $2 ];
 		/^Build-Types:\s*(.+)\s*$/ and $pkg->{buildtypes} = [ split /\s+/, $1 ];
-		/^Package-Subdir:\s*(.+?)\s*$/ and $pkg->{package_subdir} = $1;
+		/^Repository:\s*(.+?)\s*$/ and $pkg->{repository} = $1;
 		/^Category: \s*(.+)\s*$/ and do {
 			$pkg->{category} = $1;
 			defined $category{$1} or $category{$1} = {};

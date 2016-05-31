@@ -82,13 +82,6 @@ proto_3g_setup() {
 				gcom -d "$device" -s /etc/gcom/getcarrier.gcom || return 1
 			}
 
-			# autodetect APN
-			if [ -z "$apn" ]; then
-				mccmnc=`gcom -d "$device" -s /etc/gcom/getimsi.gcom | head -c 5`
-				apn=`awk "/$mccmnc/{print \\$2}" /etc/apnlist`
-				logger -t "$0" "MCCMNC: $mccmnc, APN: $apn"
-			fi
-
 			if [ -z "$dialnumber" ]; then
 				dialnumber="*99***1#"
 			fi

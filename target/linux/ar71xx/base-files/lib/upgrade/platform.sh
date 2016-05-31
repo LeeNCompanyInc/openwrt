@@ -268,7 +268,8 @@ platform_check_image() {
 	wlae-ag300n | \
 	nbg460n_550n_550nh | \
 	unifi | \
-	unifiac | \
+	unifiac-lite | \
+	unifiac-pro | \
 	unifi-outdoor | \
 	carambola2 | \
 	weio )
@@ -279,6 +280,7 @@ platform_check_image() {
 		return 0
 		;;
 
+	cpe210|\
 	cpe510)
 		tplink_pharos_check_image "$1" && return 0
 		return 1
@@ -313,6 +315,7 @@ platform_check_image() {
 		return 0;
 		;;
 	mr1750 | \
+	mr1750v2 | \
 	mr600 | \
 	mr600v2 | \
 	mr900 | \
@@ -321,6 +324,7 @@ platform_check_image() {
 	om2pv2 | \
 	om2p-hs | \
 	om2p-hsv2 | \
+	om2p-hsv3 | \
 	om2p-lc | \
 	om5p | \
 	om5p-an | \
@@ -378,12 +382,14 @@ platform_check_image() {
 	tl-wr720n-v3 | \
 	tl-wr741nd | \
 	tl-wr741nd-v4 | \
+	tl-wr810n | \
 	tl-wr841n-v1 | \
 	tl-wa830re-v2 | \
 	tl-wr841n-v7 | \
 	tl-wr841n-v8 | \
 	tl-wr841n-v9 | \
 	tl-wr842n-v2 | \
+	tl-wr842n-v3 | \
 	tl-wr941nd | \
 	tl-wr941nd-v5 | \
 	tl-wr941nd-v6 | \
@@ -570,6 +576,7 @@ platform_do_upgrade() {
 		platform_do_upgrade_dir825b "$ARGV"
 		;;
 	mr1750 | \
+	mr1750v2 | \
 	mr600 | \
 	mr600v2 | \
 	mr900 | \
@@ -578,6 +585,7 @@ platform_do_upgrade() {
 	om2pv2 | \
 	om2p-hs | \
 	om2p-hsv2 | \
+	om2p-hsv3 | \
 	om2p-lc | \
 	om5p | \
 	om5p-an | \
