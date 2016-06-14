@@ -314,6 +314,7 @@ zyx_nbg6716_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(env)ro,64k(RFdata)ro,-(
 qihoo_c301_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env),64k(devdata),64k(devconf),15744k(firmware),64k(warm_start),64k(action_image_config),64k(radiocfg)ro;spi0.1:15360k(upgrade2),1024k(privatedata)
 yun_mtdlayout_8M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6464k(rootfs),1280k(kernel),64k(nvram),64k(art),7744k@0x50000(firmware)
 yun_mtdlayout_16M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,14656k(rootfs),1280k(kernel),64k(nvram),64k(art),15936k@0x50000(firmware)
+wrtnode2q_mtdlayout=mtdparts=spi0.0:192k(u-boot),64k(u-boot-env),64k(art),1472k(kernel),14592k(rootfs),16064k@0x50000(firmware),16384k@0x0(fullflash)
 
 define Image/BuildKernel
 	cp $(KDIR)/vmlinux.elf $(VMLINUX).elf
@@ -1026,6 +1027,7 @@ $(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,11520
 $(eval $(call SingleProfile,AthLzma,64k,DR344,dr344,DR344,ttyS0,115200,$$(dr344_mtdlayout),RKuImage))
 $(eval $(call SingleProfile,AthLzma,64k,WPJ531_16M,wpj531-16M,WPJ531,ttyS0,115200,$$(wpj531_mtdlayout_16M),KRuImage,65536))
 $(eval $(call SingleProfile,AthLzma,64k,WPJ558_16M,wpj558-16M,WPJ558,ttyS0,115200,$$(wpj558_mtdlayout_16M),KRuImage,65536))
+$(eval $(call SingleProfile,AthLzma,64k,WRTNODE2Q,wrtnode2q,WRTNODE2Q,ttyS0,115200,$$(wrtnode2q_mtdlayout),KRuImage))
 $(eval $(call SingleProfile,AthLzma,64k,YUN_8M,yun-8M,Yun,ttyATH0,250000,$$(yun_mtdlayout_8M),RKuImage))
 $(eval $(call SingleProfile,AthLzma,64k,YUN_16M,yun-16M,Yun,ttyATH0,250000,$$(yun_mtdlayout_16M),RKuImage))
 
@@ -1162,6 +1164,12 @@ $(eval $(call MultiProfile,Yun,YUN_16M YUN_8M))
 $(eval $(call MultiProfile,Minimal,$(SINGLE_PROFILES)))
 $(eval $(call MultiProfile,Madwifi,EAP7660D WP543))
 
+define LegacyDevice/OM2P
+  DEVICE_TITLE := OpenMesh OM2P/OM2Pv2/OM2P-HS/OM2P-HSv2/OM2P-HSv3/OM2P-LC
+  DEVICE_PACKAGES := kmod-ath9k om-watchdog
+endef
+LEGACY_DEVICES += OM2P
+
 endif # ifeq ($(SUBTARGET),generic)
 
 ifeq ($(SUBTARGET),nand)
@@ -1205,6 +1213,15 @@ ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)
 endif
 	$(call Image/BuildLoader,generic,elf)
 	$(call Image/Build/Profile/$(if $(CONFIG_IB),Default,$(IMAGE_PROFILE)),loader)
+endef
+
+define Image/Prepare/Profile
+	$(call Image/Build/Profile/$(1),loader)
+endef
+
+define Image/Build/Profile
+	$(call Image/Build/Profile/$(1),buildkernel)
+	$(call Image/Build/Profile/$(1),$(2))
 endef
 
 # $(1): filesystem type.

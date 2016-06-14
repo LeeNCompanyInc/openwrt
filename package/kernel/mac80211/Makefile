@@ -20,7 +20,7 @@ PKG_SOURCE:=compat-wireless-$(PKG_VERSION)$(PKG_BACKPORT_VERSION).tar.bz2
 PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/compat-wireless-$(PKG_VERSION)
 PKG_BUILD_PARALLEL:=1
 
-PKG_MAINTAINER:=Felix Fietkau <nbd@openwrt.org>
+PKG_MAINTAINER:=Felix Fietkau <nbd@nbd.name>
 
 PKG_DRIVERS = \
 	adm8211 \
@@ -80,7 +80,7 @@ WMENU:=Wireless Drivers
 define KernelPackage/mac80211/Default
   SUBMENU:=$(WMENU)
   URL:=https://wireless.wiki.kernel.org/
-  MAINTAINER:=Felix Fietkau <nbd@openwrt.org>
+  MAINTAINER:=Felix Fietkau <nbd@nbd.name>
 endef
 
 define KernelPackage/cfg80211
@@ -161,6 +161,7 @@ define KernelPackage/ath/config
   if PACKAGE_kmod-ath
 	config ATH_USER_REGD
 		bool "Force Atheros drivers to respect the user's regdomain settings"
+		default y
 		help
 		  Atheros' idea of regulatory handling is that the EEPROM of the card defines
 		  the regulatory limits and the user is only allowed to restrict the settings

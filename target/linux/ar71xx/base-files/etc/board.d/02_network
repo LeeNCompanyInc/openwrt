@@ -400,7 +400,8 @@ routerstation|\
 tl-wr710n |\
 tl-wr720n-v3|\
 tl-wr810n |\
-wpe72)
+wpe72 |\
+wrtnode2q)
 	ucidef_set_interfaces_lan_wan "eth1" "eth0"
 	;;
 
@@ -451,6 +452,7 @@ oolite |\
 qihoo-c301 |\
 rb-750 |\
 rb-751 |\
+som9331 |\
 tew-632brp |\
 tew-712br |\
 tew-732br |\

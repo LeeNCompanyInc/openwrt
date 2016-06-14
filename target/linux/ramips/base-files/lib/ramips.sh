@@ -91,6 +91,9 @@ ramips_board_detect() {
 	*"C20i")
 		name="c20i"
 		;;
+	*"C50")
+		name="c50"
+		;;
 	*"Carambola")
 		name="carambola"
 		;;
@@ -159,6 +162,9 @@ ramips_board_detect() {
 		;;
 	*"Dovado Tiny AC")
 		name="tiny-ac"
+		;;
+	*"DuZun DM06")
+		name="duzun-dm06"
 		;;
 	*"E1700")
 		name="e1700"
