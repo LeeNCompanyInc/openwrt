@@ -38,13 +38,13 @@ Signed-off-by: John Crispin <blogic@openwrt.org>
  obj-$(CONFIG_SPI_OC_TINY)		+= spi-oc-tiny.o
 --- /dev/null
 +++ b/drivers/spi/spi-mt7621.c
-@@ -0,0 +1,480 @@
+@@ -0,0 +1,483 @@
 +/*
 + * spi-mt7621.c -- MediaTek MT7621 SPI controller driver
 + *
 + * Copyright (C) 2011 Sergiy <piratfm@gmail.com>
 + * Copyright (C) 2011-2013 Gabor Juhos <juhosg@openwrt.org>
-+ * Copyright (C) 2014-2015 Felix Fietkau <nbd@openwrt.org>
++ * Copyright (C) 2014-2015 Felix Fietkau <nbd@nbd.name>
 + *
 + * Some parts are based on spi-orion.c:
 + *   Author: Shadi Ammouri <shadi@marvell.com>
@@ -239,6 +239,9 @@ Signed-off-by: John Crispin <blogic@openwrt.org>
 +
 +		if (!buf)
 +			continue;
++
++		if (t->speed_hz < speed)
++			speed = t->speed_hz;
 +
 +		if (WARN_ON(len + t->len > 36)) {
 +			status = -EIO;
@@ -517,5 +520,5 @@ Signed-off-by: John Crispin <blogic@openwrt.org>
 +module_platform_driver(mt7621_spi_driver);
 +
 +MODULE_DESCRIPTION("MT7621 SPI driver");
-+MODULE_AUTHOR("Felix Fietkau <nbd@openwrt.org>");
++MODULE_AUTHOR("Felix Fietkau <nbd@nbd.name>");
 +MODULE_LICENSE("GPL");

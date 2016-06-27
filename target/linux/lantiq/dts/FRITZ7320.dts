@@ -32,29 +32,43 @@
 				#address-cells = <1>;
 				#size-cells = <1>;
 
-				partition@0 {
-					label = "urlader";
-					reg = <0x00000 0x20000>;
-					read-only;
-				};
+				partitions {
+					compatible = "fixed-partitions";
+					#address-cells = <1>;
+					#size-cells = <1>;
 
-				partition@20000 {
-					label = "firmware";
-					reg = <0x20000 0xf60000>;
-				};
+					ath9k_cal: partition@0 {
+						label = "urlader";
+						reg = <0x00000 0x20000>;
+						read-only;
+					};
 
-				partition@f80000 {
-					label = "tffs (1)";
-					reg = <0xf80000 0x40000>;
-					read-only;
-				};
+					partition@20000 {
+						label = "firmware";
+						reg = <0x20000 0xf60000>;
+					};
 
-				partition@fc0000 {
-					label = "tffs (2)";
-					reg = <0xfc0000 0x40000>;
-					read-only;
+					partition@f80000 {
+						label = "tffs (1)";
+						reg = <0xf80000 0x40000>;
+						read-only;
+					};
+
+					partition@fc0000 {
+						label = "tffs (2)";
+						reg = <0xfc0000 0x40000>;
+						read-only;
+					};
 				};
 			};
+		};
+
+		ath9k_eep {
+			compatible = "ath9k,eeprom";
+			ath,eep-flash = <&ath9k_cal 0x985>;
+			ath,device-id = /bits/ 16 <0xff1d 0x2d>;
+			ath,eep-endian;
+			ath,eep-swap;
 		};
 
 		gpio: pinmux@E100B10 {

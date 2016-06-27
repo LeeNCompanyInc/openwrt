@@ -297,6 +297,24 @@ endef
 $(eval $(call KernelPackage,usb-mass-storage-gadget))
 
 
+define KernelPackage/usb-storage-gadget
+  TITLE:=USB Mass Storage Gadget support
+  KCONFIG:=CONFIG_USB_F_MASS_STORAGE
+  DEPENDS:=+kmod-usb-gadget +kmod-usb-lib-composite
+  FILES:= \
+	$(LINUX_DIR)/drivers/usb/gadget/function/usb_f_mass_storage.ko \
+	$(LINUX_DIR)/drivers/usb/gadget/legacy/g_mass_storage.ko
+  AUTOLOAD:=$(call AutoLoad,52,usb_f_mass_storage g_mass_storage)
+  $(call AddDepends/usb)
+endef
+
+define KernelPackage/usb-storage-gadget/description
+  Kernel support for USB Mass Storage Gadget.
+endef
+
+$(eval $(call KernelPackage,usb-storage-gadget))
+
+
 define KernelPackage/usb-uhci
   TITLE:=Support for UHCI controllers
   KCONFIG:= \
@@ -479,7 +497,7 @@ $(eval $(call KernelPackage,usb2-pci))
 
 define KernelPackage/usb-dwc2
   TITLE:=DWC2 USB controller driver
-  DEPENDS:=+(TARGET_brcm2708||TARGET_at91||TARGET_brcm63xx||TARGET_mxs||TARGET_imx6||TARGET_omap):kmod-usb-gadget
+  DEPENDS:=+(TARGET_brcm2708||TARGET_at91||TARGET_brcm63xx||TARGET_mxs||TARGET_imx6||TARGET_omap||TARGET_socfpga):kmod-usb-gadget
   KCONFIG:= \
 	CONFIG_USB_DWC2 \
 	CONFIG_USB_DWC2_PCI \
@@ -488,6 +506,7 @@ define KernelPackage/usb-dwc2
 	CONFIG_USB_DWC2_VERBOSE=n \
 	CONFIG_USB_DWC2_TRACK_MISSED_SOFS=n \
 	CONFIG_USB_DWC2_DEBUG_PERIODIC=n
+	CONFIG_USB_DWC2_DUAL_ROLE=y
   FILES:= \
 	$(LINUX_DIR)/drivers/usb/dwc2/dwc2.ko \
 	$(LINUX_DIR)/drivers/usb/dwc2/dwc2_platform.ko@lt4.3
@@ -501,23 +520,6 @@ define KernelPackage/usb-dwc2/description
 endef
 
 $(eval $(call KernelPackage,usb-dwc2))
-
-
-define KernelPackage/usb2-oxnas
-  TITLE:=OXNAS USB controller driver
-  DEPENDS:=@TARGET_oxnas +kmod-usb2
-  KCONFIG:=CONFIG_USB_EHCI_OXNAS
-  FILES:=$(LINUX_DIR)/drivers/usb/host/ehci-oxnas.ko
-  AUTOLOAD:=$(call AutoLoad,55,ehci-oxnas,1)
-  $(call AddDepends/usb)
-endef
-
-define KernelPackage/usb2-oxnas/description
- This driver provides USB Device Controller support for the
- EHCI USB host built-in to the PLXTECH NAS782x SoC
-endef
-
-$(eval $(call KernelPackage,usb2-oxnas))
 
 
 define KernelPackage/usb-dwc3
