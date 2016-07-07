@@ -136,6 +136,9 @@ mzk-750dhp|\
 mzk-dp150n)
 	ucidef_set_led_default "power" "power" "$board:green:power" "1"
 	;;
+dir-860l-b1)
+	ucidef_set_led_netdev "wan" "wan" "$board:green:net" "eth0.2"
+	;;
 ex2700)
 	ucidef_set_led_default "power_r" "POWER (red)" "$board:red:power" "0"
 	set_wifi_led "$board:green:router"
@@ -295,6 +298,11 @@ y1s)
 	ucidef_set_led_default "power" "power" "$board:blue:power" "1"
 	set_usb_led "$board:blue:usb"
 	set_wifi_led "$board:blue:wifi"
+	;;
+zbt-ape522ii)
+	ucidef_set_led_netdev "wlan2g4" "wlan1-link" "$board:green:wlan2g4" "wlan1"
+	ucidef_set_led_netdev "sys1" "wlan1" "$board:green:sys1" "wlan1" "tx rx"
+	ucidef_set_led_netdev "sys2" "wlan0" "$board:green:sys2" "wlan0" "tx rx"
 	;;
 zbt-wa05)
 	ucidef_set_led_default "power" "power" "$board:blue:power" "1"

@@ -354,7 +354,7 @@ endef
 ifndef IB
 define Device/Build/initramfs
   $(call Device/Export,$(KDIR)/tmp/$$(KERNEL_INITRAMFS_IMAGE),$(1))
-  $$(_TARGET): $(BIN_DIR)/$$(KERNEL_INITRAMFS_IMAGE)
+  $$(_TARGET): $$(if $$(KERNEL_INITRAMFS),$(BIN_DIR)/$$(KERNEL_INITRAMFS_IMAGE))
 
   $(KDIR)/$$(KERNEL_INITRAMFS_NAME):: image_prepare
   $(BIN_DIR)/$$(KERNEL_INITRAMFS_IMAGE): $(KDIR)/tmp/$$(KERNEL_INITRAMFS_IMAGE)
@@ -466,11 +466,10 @@ define LegacyDevice/Build
   .PHONY: legacy-image-prepare-$(1) legacy-image-$(1)
 
   legacy-image-prepare-$(1):
-	$(foreach fs,$(TARGET_FILESYSTEMS),
-		$$(call Image/Prepare/Profile,$(1),$(fs))
-	)
+	$$(call Image/Prepare/Profile,$(1))
 
   legacy-image-$(1):
+	$$(call Image/BuildKernel/Profile,$(1))
 	$(foreach fs,$(TARGET_FILESYSTEMS),
 		$$(call Image/Build/Profile,$(1),$(fs))
 	)
@@ -484,6 +483,7 @@ define LegacyDevice
   $(call LegacyDevice/$(1),$(1))
   $(call LegacyDevice/Check,$(1))
   $(call LegacyDevice/$(if $(DUMP),Dump,Build),$(1))
+
 endef
 
 define BuildImage
