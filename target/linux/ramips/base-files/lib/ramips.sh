@@ -115,6 +115,9 @@ ramips_board_detect() {
 	*"DB-WRT01")
 		name="db-wrt01"
 		;;
+	*"DCH-M225")
+		name="dch-m225"
+		;;
 	*"DCS-930")
 		name="dcs-930"
 		;;
@@ -330,6 +333,9 @@ ramips_board_detect() {
 		;;
 	*"NCS601W")
 		name="ncs601w"
+		;;
+	*"NixcoreX1")
+		name="nixcore-x1"
 		;;
 	*"NW718")
 		name="nw718"
