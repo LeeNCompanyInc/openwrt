@@ -198,6 +198,7 @@ platform_check_image() {
 	mr12 | \
 	mr16 | \
 	wpj558 | \
+	zbt-we1526 | \
 	zcn-1523h-2 | \
 	zcn-1523h-5)
 		[ "$magic_long" != "68737173" -a "$magic_long" != "19852003" ] && {
@@ -232,7 +233,9 @@ platform_check_image() {
 	ew-dorin | \
 	ew-dorin-router | \
 	gl-ar150 | \
+	gl-mifi | \
 	gl-ar300 | \
+	gl-ar300m | \
 	gl-domino | \
 	hiwifi-hc6361 | \
 	hornet-ub-x2 | \

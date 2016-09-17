@@ -534,6 +534,19 @@ static int b53_switch_reset(struct b53_device *dev)
 		b53_write8(dev, B53_CTRL_PAGE, B53_PORT_OVERRIDE_CTRL,
 			   mii_port_override | PORT_OVERRIDE_EN |
 			   PORT_OVERRIDE_LINK);
+
+		/* BCM47189 has another interface connected to the port 5 */
+		if (dev->enabled_ports & BIT(5)) {
+			u8 po_reg = B53_GMII_PORT_OVERRIDE_CTRL(5);
+			u8 gmii_po;
+
+			b53_read8(dev, B53_CTRL_PAGE, po_reg, &gmii_po);
+			gmii_po |= GMII_PO_LINK |
+				   GMII_PO_RX_FLOW |
+				   GMII_PO_TX_FLOW |
+				   GMII_PO_EN;
+			b53_write8(dev, B53_CTRL_PAGE, po_reg, gmii_po);
+		}
 	} else if (is5301x(dev)) {
 		if (cpu_port == 8) {
 			u8 mii_port_override;
@@ -1370,9 +1383,8 @@ static int b53_switch_init(struct b53_device *dev)
 			sw_dev->cpu_port = 5;
 	}
 
-	/* cpu port is always last */
-	sw_dev->ports = sw_dev->cpu_port + 1;
 	dev->enabled_ports |= BIT(sw_dev->cpu_port);
+	sw_dev->ports = fls(dev->enabled_ports);
 
 	dev->ports = devm_kzalloc(dev->dev,
 				  sizeof(struct b53_port) * sw_dev->ports,

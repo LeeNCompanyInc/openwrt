@@ -32,8 +32,8 @@ ifeq ($(PKG_VERSION),5.4.0)
   PKG_MD5SUM:=4c626ac2a83ef30dfb9260e6f59c2b30
 endif
 
-ifeq ($(PKG_VERSION),6.1.0)
-  PKG_MD5SUM:=8fb6cb98b8459f5863328380fbf06bd1
+ifeq ($(PKG_VERSION),6.2.0)
+  PKG_MD5SUM:=9768625159663b300ae4de2f4745fcc4
 endif
 
 ifneq ($(CONFIG_GCC_VERSION_4_8_ARC),)
@@ -69,11 +69,14 @@ HOST_STAMP_CONFIGURED:=$(GCC_BUILD_DIR)/.configured
 HOST_STAMP_INSTALLED:=$(STAGING_DIR_HOST)/stamp/.gcc_$(GCC_VARIANT)_installed
 
 SEP:=,
-TARGET_LANGUAGES:="c,c++$(if $(CONFIG_INSTALL_LIBGCJ),$(SEP)java)$(if $(CONFIG_INSTALL_GFORTRAN),$(SEP)fortran)"
+TARGET_LANGUAGES:="c,c++$(if $(CONFIG_INSTALL_LIBGCJ),$(SEP)java)$(if $(CONFIG_INSTALL_GFORTRAN),$(SEP)fortran)$(if $(CONFIG_INSTALL_GCCGO),$(SEP)go)"
 
 export libgcc_cv_fixed_point=no
 ifdef CONFIG_USE_UCLIBC
   export glibcxx_cv_c99_math_tr1=no
+endif
+ifdef CONFIG_INSTALL_GCCGO
+  export libgo_cv_c_split_stack_supported=no
 endif
 
 ifdef CONFIG_GCC_USE_GRAPHITE
@@ -104,6 +107,7 @@ GCC_CONFIGURE:= \
 		--disable-libgomp \
 		--disable-libmudflap \
 		--disable-multilib \
+		--disable-libmpx \
 		--disable-nls \
 		$(GRAPHITE_CONFIGURE) \
 		--with-host-libstdcxx=-lstdc++ \
@@ -163,12 +167,17 @@ ifneq ($(CONFIG_SOFT_FLOAT),y)
   endif
 endif
 
+ifeq ($(CONFIG_TARGET_x86)$(CONFIG_USE_GLIBC)$(CONFIG_INSTALL_GCCGO),yyy)
+  TARGET_CFLAGS+=-fno-split-stack
+endif
+
 GCC_MAKE:= \
 	export SHELL="$(BASH)"; \
 	$(MAKE) \
 		CFLAGS="$(HOST_CFLAGS)" \
 		CFLAGS_FOR_TARGET="$(TARGET_CFLAGS)" \
-		CXXFLAGS_FOR_TARGET="$(TARGET_CFLAGS)"
+		CXXFLAGS_FOR_TARGET="$(TARGET_CFLAGS)" \
+		GOCFLAGS_FOR_TARGET="$(TARGET_CFLAGS)"
 
 define Host/SetToolchainInfo
 	$(SED) 's,TARGET_CROSS=.*,TARGET_CROSS=$(REAL_GNU_TARGET_NAME)-,' $(TOOLCHAIN_DIR)/info.mk

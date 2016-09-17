@@ -127,7 +127,7 @@ kill_remaining() { # [ <signal> ]
 		else 
 			case "$name" in
 				# Skip essential services
-				*procd*|*ash*|*init*|*watchdog*|*ssh*|*dropbear*|*telnet*|*login*|*hostapd*|*wpa_supplicant*|*nas*) : ;;
+				*procd*|*ash*|*init*|*watchdog*|*ssh*|*dropbear*|*telnet*|*login*|*hostapd*|*wpa_supplicant*|*nas*|*relayd*) : ;;
 
 				# Killable process
 				*)
@@ -243,6 +243,7 @@ do_upgrade() {
 	[ -n "$DELAY" ] && sleep "$DELAY"
 	ask_bool 1 "Reboot" && {
 		v "Rebooting system..."
+		umount -a
 		reboot -f
 		sleep 5
 		echo b 2>/dev/null >/proc/sysrq-trigger

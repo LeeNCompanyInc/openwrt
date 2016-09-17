@@ -2,8 +2,7 @@ ARCH:=mips
 SUBTARGET:=xway_legacy
 BOARDNAME:=XWAY Legacy
 FEATURES:=squashfs atm mips16 ramdisk small_flash
-CPU_TYPE:=34kc
-CPU_SUBTYPE:=dsp
+CPU_TYPE:=24kc
 
 DEFAULT_PACKAGES+=kmod-leds-gpio kmod-gpio-button-hotplug
 

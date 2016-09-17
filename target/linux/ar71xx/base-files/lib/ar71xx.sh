@@ -73,6 +73,15 @@ cybertan_get_hw_magic() {
 	dd bs=8 count=1 skip=0 if=$part 2>/dev/null | hexdump -v -n 8 -e '1/1 "%02x"'
 }
 
+dir505_board_detect() {
+	local dev=$(find_mtd_part 'mac')
+	[ -z "$dev" ] && return
+
+	# The revision is stored at the beginning of the "mac" partition
+	local rev="$(LC_CTYPE=C awk -v 'FS=[^[:print:]]' '{print $1; exit}' $dev)"
+	AR71XX_MODEL="D-Link DIR-505 rev. $rev"
+}
+
 tplink_get_hwid() {
 	local part
 
@@ -271,7 +280,7 @@ tplink_board_detect() {
 		model="TP-Link TL-WDR6500"
 		;;
 	"453000"*)
-		model="MERCURY MW4530R"
+		model="Mercury MW4530R"
 		;;
 	"934100"*)
 		model="NC-LINK SMART-300"
@@ -471,6 +480,7 @@ ar71xx_board_detect() {
 		;;
 	*"DIR-505 rev. A1")
 		name="dir-505-a1"
+		dir505_board_detect
 		;;
 	*"DIR-600 rev. A1")
 		name="dir-600-a1"
@@ -535,6 +545,12 @@ ar71xx_board_detect() {
 		;;
 	*"GL AR300")
 		name="gl-ar300"
+		;;
+	*"GL-AR300M")
+		name="gl-ar300m"
+		;;
+	*"GL-MIFI")
+		name="gl-mifi"
 		;;
 	*"EnGenius EPG5000")
 		name="epg5000"
@@ -1081,6 +1097,9 @@ ar71xx_board_detect() {
 		;;
 	*WHR-HP-G300N)
 		name="whr-hp-g300n"
+		;;
+	*ZBT-WE1526)
+		name="zbt-we1526"
 		;;
 	*ZCN-1523H-2)
 		name="zcn-1523h-2"

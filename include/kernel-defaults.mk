@@ -5,6 +5,12 @@
 # See /LICENSE for more information.
 #
 
+ifneq ($(SOURCE_DATE_EPOCH),)
+  ifndef DUMP
+    KBUILD_BUILD_TIMESTAMP:=$(shell perl -e 'print scalar gmtime($(SOURCE_DATE_EPOCH))')
+  endif
+endif
+
 KERNEL_MAKEOPTS := -C $(LINUX_DIR) \
 	HOSTCFLAGS="$(HOST_CFLAGS) -Wall -Wmissing-prototypes -Wstrict-prototypes" \
 	CROSS_COMPILE="$(KERNEL_CROSS)" \
@@ -12,6 +18,8 @@ KERNEL_MAKEOPTS := -C $(LINUX_DIR) \
 	KBUILD_HAVE_NLS=no \
 	KBUILD_BUILD_USER="$(call qstrip,$(CONFIG_KERNEL_BUILD_USER))" \
 	KBUILD_BUILD_HOST="$(call qstrip,$(CONFIG_KERNEL_BUILD_DOMAIN))" \
+	KBUILD_BUILD_TIMESTAMP="$(KBUILD_BUILD_TIMESTAMP)" \
+	KBUILD_BUILD_VERSION="0" \
 	CONFIG_SHELL="$(BASH)" \
 	$(if $(findstring c,$(OPENWRT_VERBOSE)),V=1,V='') \
 	$(if $(PKG_BUILD_ID),LDFLAGS_MODULE=--build-id=0x$(PKG_BUILD_ID))
@@ -29,6 +37,10 @@ endif
 
 ifdef CONFIG_USE_SPARSE
   KERNEL_MAKEOPTS += C=1 CHECK=$(STAGING_DIR_HOST)/bin/sparse
+endif
+
+ifneq ($(strip $(CONFIG_KERNEL_GIT_CLONE_URI)),"")
+ KERNEL_MAKEOPTS += LOCALVERSION=
 endif
 
 export HOST_EXTRACFLAGS=-I$(STAGING_DIR_HOST)/include
@@ -50,7 +62,7 @@ ifeq ($(strip $(CONFIG_EXTERNAL_KERNEL_TREE)),"")
     define Kernel/Prepare/Default
 	xzcat $(DL_DIR)/$(LINUX_SOURCE) | $(TAR) -C $(KERNEL_BUILD_DIR) $(TAR_OPTIONS)
 	$(Kernel/Patch)
-	touch $(LINUX_DIR)/.quilt_used
+	$(if $(QUILT),touch $(LINUX_DIR)/.quilt_used)
     endef
   else
     define Kernel/Prepare/Default
@@ -105,6 +117,7 @@ define Kernel/SetNoInitramfs
 endef
 
 define Kernel/Configure/Default
+	rm -f $(LINUX_DIR)/localversion
 	$(LINUX_CONF_CMD) > $(LINUX_DIR)/.config.target
 # copy CONFIG_KERNEL_* settings over to .config.target
 	awk '/^(#[[:space:]]+)?CONFIG_KERNEL/{sub("CONFIG_KERNEL_","CONFIG_");print}' $(TOPDIR)/.config >> $(LINUX_DIR)/.config.target

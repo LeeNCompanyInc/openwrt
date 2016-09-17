@@ -69,7 +69,6 @@ bsb)
 	ucidef_set_interfaces_lan_wan "eth1" "eth0"
 	ucidef_add_switch "switch0" \
 		"0@eth1" "1:lan" "3:lan"  # XXX: confirm cpu port!
-	ucidef_set_interface_wlan
 	;;
 
 cpe210|\
@@ -194,7 +193,7 @@ el-m150)
 	;;
 
 tellstick-znet-lite)
-	ucidef_set_interface_wan "eth0" "dhcp"
+	ucidef_set_interface_wan "eth0"
 	ucidef_set_interface_raw "wlan" "wlan0" "dhcp"
 	;;
 
@@ -258,13 +257,13 @@ wrt160nl)
 	;;
 
 wzr-hp-g300nh)
-	ucidef_set_interfaces_lan_wan "eth0.1" "eth1"
+	ucidef_set_interfaces_lan_wan "eth0" "eth1"
 	ucidef_add_switch "switch0" \
 		"0:lan" "1:lan" "2:lan" "3:lan" "5@eth0"
 	;;
 
 cr3000)
-	ucidef_set_interfaces_lan_wan "eth0.1" "eth1"
+	ucidef_set_interfaces_lan_wan "eth0" "eth1"
 	ucidef_add_switch "switch0"  \
 		"0@eth0" "1:lan:1" "2:lan:4" "3:lan:3" "4:lan:2"
 	;;
@@ -391,8 +390,10 @@ alfa-ap96 |\
 alfa-nx |\
 ap83 |\
 gl-ar150 |\
+gl-ar300m |\
 gl-domino |\
 gl-inet |\
+gl-mifi |\
 jwap003 |\
 pb42 |\
 pb44 |\
@@ -477,7 +478,8 @@ tl-wr842n-v3 |\
 whr-g301n |\
 whr-hp-g300n |\
 whr-hp-gn |\
-wzr-hp-ag300h)
+wzr-hp-ag300h |\
+zbt-we1526)
 	ucidef_set_interfaces_lan_wan "eth0" "eth1"
 	ucidef_add_switch "switch0" \
 		"0@eth0" "1:lan:4" "2:lan:3" "3:lan:2" "4:lan:1"

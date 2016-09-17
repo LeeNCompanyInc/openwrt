@@ -682,8 +682,7 @@ define KernelPackage/brcmfmac
   TITLE:=Broadcom IEEE802.11n USB FullMAC WLAN driver
   URL:=https://wireless.wiki.kernel.org/en/users/drivers/brcm80211
   DEPENDS+= @USB_SUPPORT +kmod-cfg80211 +@DRIVER_11N_SUPPORT +kmod-brcmutil \
-	+BRCMFMAC_PCIE:brcmfmac-firmware-pcie \
-	+BRCMFMAC_SDIO:kmod-mmc +BRCMFMAC_SDIO:brcmfmac-firmware-sdio \
+	+BRCMFMAC_SDIO:kmod-mmc \
 	+BRCMFMAC_USB:kmod-usb-core +BRCMFMAC_USB:brcmfmac-firmware-usb
   FILES:=$(PKG_BUILD_DIR)/drivers/net/wireless/broadcom/brcm80211/brcmfmac/brcmfmac.ko
   AUTOLOAD:=$(call AutoProbe,brcmfmac)
@@ -1494,7 +1493,7 @@ config-$(call config_package,lib80211) += LIB80211 LIB80211_CRYPT_WEP LIB80211_C
 config-$(call config_package,airo) += AIRO
 
 config-$(call config_package,ath) += ATH_CARDS ATH_COMMON
-config-$(CONFIG_PACKAGE_ATH_DEBUG) += ATH_DEBUG ATH10K_DEBUG
+config-$(CONFIG_PACKAGE_ATH_DEBUG) += ATH_DEBUG ATH10K_DEBUG ATH9K_STATION_STATISTICS
 config-$(CONFIG_PACKAGE_ATH_DFS) += ATH9K_DFS_CERTIFIED ATH10K_DFS_CERTIFIED
 
 config-$(call config_package,ath9k) += ATH9K

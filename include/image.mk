@@ -12,8 +12,29 @@ include $(INCLUDE_DIR)/host.mk
 include $(INCLUDE_DIR)/version.mk
 include $(INCLUDE_DIR)/image-commands.mk
 
+ifndef IB
+  ifdef CONFIG_TARGET_PER_DEVICE_ROOTFS
+    TARGET_PER_DEVICE_ROOTFS := 1
+  endif
+endif
+
+include $(INCLUDE_DIR)/image-legacy.mk
+
+ifdef TARGET_PER_DEVICE_ROOTFS
+  include $(INCLUDE_DIR)/rootfs.mk
+endif
+
 override MAKE:=$(_SINGLE)$(SUBMAKE)
 override NO_TRACE_MAKE:=$(_SINGLE)$(NO_TRACE_MAKE)
+
+target_params = $(subst +,$(space),$*)
+param_get = $(patsubst $(1)=%,%,$(filter $(1)=%,$(2)))
+param_get_default = $(firstword $(call param_get,$(1),$(2)) $(3))
+param_mangle = $(subst $(space),_,$(strip $(1)))
+param_unmangle = $(subst _,$(space),$(1))
+
+mkfs_packages_id = $(shell echo $(sort $(1)) | md5sum | head -c 8)
+mkfs_target_dir = $(if $(call param_get,pkg,$(1)),$(KDIR)/target-dir-$(call param_get,pkg,$(1)),$(TARGET_DIR))
 
 KDIR=$(KERNEL_BUILD_DIR)
 KDIR_TMP=$(KDIR)/tmp
@@ -76,8 +97,6 @@ fs-types-$(CONFIG_TARGET_ROOTFS_EXT4FS) += ext4
 fs-types-$(CONFIG_TARGET_ROOTFS_ISO) += iso
 fs-types-$(CONFIG_TARGET_ROOTFS_UBIFS) += ubifs
 fs-subtypes-$(CONFIG_TARGET_ROOTFS_JFFS2) += $(addsuffix -raw,$(addprefix jffs2-,$(JFFS2_BLOCKSIZE)))
-fs-subtypes-$(CONFIG_TARGET_ROOTFS_CPIOGZ) += cpiogz
-fs-subtypes-$(CONFIG_TARGET_ROOTFS_TARGZ) += targz
 
 TARGET_FILESYSTEMS := $(fs-types-y)
 
@@ -145,26 +164,30 @@ define Image/BuildDTB
 	$(RM) $(2).tmp
 endef
 
-define Image/mkfs/jffs2/sub
-		$(STAGING_DIR_HOST)/bin/mkfs.jffs2 $(3) --pad -e $(patsubst %k,%KiB,$(1)) -o $(KDIR)/root.jffs2-$(2) -d $(TARGET_DIR) -v 2>&1 1>/dev/null | awk '/^.+$$$$/'
-		$(call add_jffs2_mark,$(KDIR)/root.jffs2-$(2))
+define Image/mkfs/jffs2/sub-raw
+	$(STAGING_DIR_HOST)/bin/mkfs.jffs2 \
+		$(2) \
+		-e $(patsubst %k,%KiB,$(1)) \
+		-o $@ -d $(call mkfs_target_dir,$(3)) \
+		-v 2>&1 1>/dev/null | awk '/^.+$$$$/'
 endef
 
-define Image/mkfs/jffs2/sub-raw
-		$(STAGING_DIR_HOST)/bin/mkfs.jffs2 $(3) -e $(patsubst %k,%KiB,$(1)) -o $(KDIR)/root.jffs2-$(2)-raw -d $(TARGET_DIR) -v 2>&1 1>/dev/null | awk '/^.+$$$$/'
+define Image/mkfs/jffs2/sub
+	$(call Image/mkfs/jffs2/sub-raw,$(1),--pad $(2),$(3))
+	$(call add_jffs2_mark,$@)
 endef
 
 define Image/mkfs/jffs2/template
-  Image/mkfs/jffs2-$(1) = $$(call Image/mkfs/jffs2/sub,$(1),$(1),$(JFFS2OPTS))
-  Image/mkfs/jffs2-$(1)-raw = $$(call Image/mkfs/jffs2/sub-raw,$(1),$(1),$(JFFS2OPTS))
+  Image/mkfs/jffs2-$(1) = $$(call Image/mkfs/jffs2/sub,$(1),$(JFFS2OPTS),$$(1))
+  Image/mkfs/jffs2-$(1)-raw = $$(call Image/mkfs/jffs2/sub-raw,$(1),$(JFFS2OPTS),$$(1))
 
 endef
 
 define Image/mkfs/jffs2-nand/template
   Image/mkfs/jffs2-nand-$(1) = \
 	$$(call Image/mkfs/jffs2/sub, \
-		$(word 2,$(subst -, ,$(1))),nand-$(1), \
-			$(JFFS2OPTS) --no-cleanmarkers --pagesize=$(word 1,$(subst -, ,$(1))))
+		$(word 2,$(subst -, ,$(1))), \
+			$(JFFS2OPTS) --no-cleanmarkers --pagesize=$(word 1,$(subst -, ,$(1))),$$(1))
 
 endef
 
@@ -172,7 +195,11 @@ $(eval $(foreach S,$(JFFS2_BLOCKSIZE),$(call Image/mkfs/jffs2/template,$(S))))
 $(eval $(foreach S,$(NAND_BLOCKSIZE),$(call Image/mkfs/jffs2-nand/template,$(S))))
 
 define Image/mkfs/squashfs
-	$(STAGING_DIR_HOST)/bin/mksquashfs4 $(TARGET_DIR) $(KDIR)/root.squashfs -nopad -noappend -root-owned -comp $(SQUASHFSCOMP) $(SQUASHFSOPT) -processors $(if $(CONFIG_PKG_BUILD_JOBS),$(CONFIG_PKG_BUILD_JOBS),1) $(if $(SOURCE_DATE_EPOCH),-fixed-time $(SOURCE_DATE_EPOCH))
+	$(STAGING_DIR_HOST)/bin/mksquashfs4 $(call mkfs_target_dir,$(1)) $@ \
+		-nopad -noappend -root-owned \
+		-comp $(SQUASHFSCOMP) $(SQUASHFSOPT) \
+		-processors $(if $(CONFIG_PKG_BUILD_JOBS),$(CONFIG_PKG_BUILD_JOBS),1) \
+		$(if $(SOURCE_DATE_EPOCH),-fixed-time $(SOURCE_DATE_EPOCH))
 endef
 
 # $(1): board name
@@ -203,55 +230,16 @@ ifneq ($(CONFIG_NAND_SUPPORT),)
 
 endif
 
-ifneq ($(CONFIG_TARGET_ROOTFS_UBIFS),)
-    define Image/mkfs/ubifs/generate
-	$(CP) ./ubinize$(1).cfg $(KDIR)
-	( cd $(KDIR); \
-		$(STAGING_DIR_HOST)/bin/ubinize \
-		$(if $($(PROFILE)_UBI_OPTS), \
-			$(shell echo $($(PROFILE)_UBI_OPTS)), \
-			$(shell echo $(UBI_OPTS)) \
-		) \
-		-o $(KDIR)/root$(1).ubi \
-		ubinize$(1).cfg \
-	)
-    endef
-
-    define Image/mkfs/ubifs
-
-        ifneq ($($(PROFILE)_UBIFS_OPTS)$(UBIFS_OPTS),)
-		$(STAGING_DIR_HOST)/bin/mkfs.ubifs \
-			$(if $($(PROFILE)_UBIFS_OPTS), \
-				$(shell echo $($(PROFILE)_UBIFS_OPTS)), \
-				$(shell echo $(UBIFS_OPTS)) \
-			) \
-			$(if $(CONFIG_TARGET_UBIFS_FREE_SPACE_FIXUP),--space-fixup) \
-			$(if $(CONFIG_TARGET_UBIFS_COMPRESSION_NONE),--force-compr=none) \
-			$(if $(CONFIG_TARGET_UBIFS_COMPRESSION_LZO),--force-compr=lzo) \
-			$(if $(CONFIG_TARGET_UBIFS_COMPRESSION_ZLIB),--force-compr=zlib) \
-			$(if $(shell echo $(CONFIG_TARGET_UBIFS_JOURNAL_SIZE)),--jrn-size=$(CONFIG_TARGET_UBIFS_JOURNAL_SIZE)) \
-			--squash-uids \
-			-o $(KDIR)/root.ubifs \
-			-d $(TARGET_DIR)
-        endif
-	$(call Image/Build,ubifs)
-
-        ifneq ($($(PROFILE)_UBI_OPTS)$(UBI_OPTS),)
-		$(if $(wildcard ./ubinize.cfg),$(call Image/mkfs/ubifs/generate,))
-		$(if $(wildcard ./ubinize-overlay.cfg),$(call Image/mkfs/ubifs/generate,-overlay))
-        endif
-	$(if $(wildcard ./ubinize.cfg),$(call Image/Build,ubi))
-    endef
-endif
-
-define Image/mkfs/cpiogz
-	( cd $(TARGET_DIR); find . | cpio -o -H newc | gzip -9n >$(BIN_DIR)/$(IMG_PREFIX)-rootfs.cpio.gz )
-endef
-
-define Image/mkfs/targz
-	$(TAR) -cp --numeric-owner --owner=0 --group=0 --sort=name \
-		$(if $(SOURCE_DATE_EPOCH),--mtime="@$(SOURCE_DATE_EPOCH)") \
-		-C $(TARGET_DIR)/ . | gzip -9n > $(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE_SANITIZED),-$(PROFILE_SANITIZED))-rootfs.tar.gz
+define Image/mkfs/ubifs
+	$(STAGING_DIR_HOST)/bin/mkfs.ubifs \
+		$(UBIFS_OPTS) $(call param_unmangle,$(call param_get,fs,$(1))) \
+		$(if $(CONFIG_TARGET_UBIFS_FREE_SPACE_FIXUP),--space-fixup) \
+		$(if $(CONFIG_TARGET_UBIFS_COMPRESSION_NONE),--force-compr=none) \
+		$(if $(CONFIG_TARGET_UBIFS_COMPRESSION_LZO),--force-compr=lzo) \
+		$(if $(CONFIG_TARGET_UBIFS_COMPRESSION_ZLIB),--force-compr=zlib) \
+		$(if $(shell echo $(CONFIG_TARGET_UBIFS_JOURNAL_SIZE)),--jrn-size=$(CONFIG_TARGET_UBIFS_JOURNAL_SIZE)) \
+		--squash-uids \
+		-o $@ -d $(call mkfs_target_dir,$(1))
 endef
 
 E2SIZE=$(shell echo $$(($(CONFIG_TARGET_ROOTFS_PARTSIZE)*1024*1024)))
@@ -263,39 +251,75 @@ define Image/mkfs/ext4
 		-m $(CONFIG_TARGET_EXT4_RESERVED_PCT) \
 		$(if $(CONFIG_TARGET_EXT4_JOURNAL),,-J) \
 		$(if $(SOURCE_DATE_EPOCH),-T $(SOURCE_DATE_EPOCH)) \
-		$(KDIR)/root.ext4 $(TARGET_DIR)/
+		$@ $(call mkfs_target_dir,$(1))/
 endef
 
 define Image/mkfs/prepare/default
 	# Use symbolic permissions to avoid clobbering SUID/SGID/sticky bits
-	- $(FIND) $(TARGET_DIR) -type f -not -perm /0100 -not -name 'ssh_host*' -not -name 'shadow' -print0 | $(XARGS) -0 chmod u+rw,g+r,o+r
-	- $(FIND) $(TARGET_DIR) -type f -perm /0100 -print0 | $(XARGS) -0 chmod u+rwx,g+rx,o+rx
-	- $(FIND) $(TARGET_DIR) -type d -print0 | $(XARGS) -0 chmod u+rwx,g+rx,o+rx
-	$(INSTALL_DIR) $(TARGET_DIR)/tmp $(TARGET_DIR)/overlay
-	chmod 1777 $(TARGET_DIR)/tmp
+	- $(FIND) $(1) -type f -not -perm /0100 -not -name 'ssh_host*' -not -name 'shadow' -print0 | $(XARGS) -0 chmod u+rw,g+r,o+r
+	- $(FIND) $(1) -type f -perm /0100 -print0 | $(XARGS) -0 chmod u+rwx,g+rx,o+rx
+	- $(FIND) $(1) -type d -print0 | $(XARGS) -0 chmod u+rwx,g+rx,o+rx
+	$(INSTALL_DIR) $(1)/tmp $(1)/overlay
+	chmod 1777 $(1)/tmp
 endef
 
 define Image/mkfs/prepare
-	$(call Image/mkfs/prepare/default)
+	$(call Image/mkfs/prepare/default,$(1))
 endef
 
-
-define Image/Checksum
-	( cd ${BIN_DIR} ; \
-		$(FIND) -maxdepth 1 -type f \! -name 'md5sums'  -printf "%P\n" | sort | xargs $1 > $2 \
-	)
+define Image/Manifest
+	$(STAGING_DIR_HOST)/bin/opkg \
+		--offline-root $(TARGET_DIR) \
+		--add-arch all:100 \
+		--add-arch $(if $(ARCH_PACKAGES),$(ARCH_PACKAGES),$(BOARD)):200 list-installed > \
+		$(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE_SANITIZED),-$(PROFILE_SANITIZED)).manifest
 endef
 
-define BuildImage/mkfs
-  install-images: mkfs-$(1)
-  .PHONY: mkfs-$(1)
-  mkfs-$(1): kernel_prepare
-	$(Image/mkfs/$(1))
-	$(call Build/mkfs/default,$(1))
-	$(call Build/mkfs/$(1),$(1))
-  $(KDIR)/root.$(1): mkfs-$(1)
+ifdef CONFIG_TARGET_ROOTFS_TARGZ
+  define Image/Build/targz
+	$(TAR) -cp --numeric-owner --owner=0 --group=0 --sort=name \
+		$(if $(SOURCE_DATE_EPOCH),--mtime="@$(SOURCE_DATE_EPOCH)") \
+		-C $(TARGET_DIR)/ . | gzip -9n > $(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE_SANITIZED),-$(PROFILE_SANITIZED))-rootfs.tar.gz
+  endef
+endif
 
-endef
+ifdef CONFIG_TARGET_ROOTFS_CPIOGZ
+  define Image/Build/cpiogz
+	( cd $(TARGET_DIR); find . | cpio -o -H newc | gzip -9n >$(BIN_DIR)/$(IMG_PREFIX)-rootfs.cpio.gz )
+  endef
+endif
+
+mkfs_packages = $(filter-out @%,$(PACKAGES_$(call param_get,pkg,pkg=$(target_params))))
+mkfs_packages_add = $(filter-out -%,$(mkfs_packages))
+mkfs_packages_remove = $(patsubst -%,%,$(filter -%,$(mkfs_packages)))
+mkfs_cur_target_dir = $(call mkfs_target_dir,pkg=$(target_params))
+
+opkg_target = \
+	$(call opkg,$(mkfs_cur_target_dir)) \
+		-f $(mkfs_cur_target_dir).conf \
+		-l $(mkfs_cur_target_dir).tmp
+
+target-dir-%: FORCE
+	rm -rf $(mkfs_cur_target_dir) $(mkfs_cur_target_dir).opkg
+	$(CP) $(TARGET_DIR) $(mkfs_cur_target_dir)
+	mv $(mkfs_cur_target_dir)/etc/opkg $(mkfs_cur_target_dir).opkg
+	echo 'src default file://$(PACKAGE_DIR_ALL)' > $(mkfs_cur_target_dir).conf
+	$(if $(call opkg_package_files,$(mkfs_packages_add)), \
+		$(opkg_target) update && \
+		$(opkg_target) install \
+			$(call opkg_package_files,$(mkfs_packages_add)))
+	$(if $(mkfs_packages_remove), \
+		$(call opkg,$(mkfs_cur_target_dir)) remove \
+			$(mkfs_packages_remove))
+	$(call Image/mkfs/prepare,$(mkfs_cur_target_dir))
+	$(call prepare_rootfs,$(mkfs_cur_target_dir))
+	mv $(mkfs_cur_target_dir).opkg $(mkfs_cur_target_dir)/etc/opkg
+	rm -rf \
+		$(mkfs_cur_target_dir).conf \
+		$(mkfs_cur_target_dir).tmp
+
+$(KDIR)/root.%: kernel_prepare
+	$(call Image/mkfs/$(word 1,$(target_params)),$(target_params))
 
 define Device/InitProfile
   PROFILES := $(PROFILE)
@@ -311,6 +335,7 @@ define Device/Init
   KERNEL_SIZE:=
   CMDLINE:=
 
+  IMAGES :=
   IMAGE_PREFIX := $(IMG_PREFIX)-$(1)
   IMAGE_NAME = $$(IMAGE_PREFIX)-$$(1)-$$(2)
   KERNEL_PREFIX = $$(IMAGE_PREFIX)
@@ -330,20 +355,28 @@ define Device/Init
   BLOCKSIZE :=
   PAGESIZE :=
   SUBPAGESIZE :=
-  UBINIZE_OPTS := -E 5
+  VID_HDR_OFFSET :=
+  UBINIZE_OPTS :=
+  UBINIZE_PARTS :=
+  MKUBIFS_OPTS :=
+
+  FS_OPTIONS/ubifs = $$(MKUBIFS_OPTS)
 
   DEVICE_DTS :=
   DEVICE_DTS_DIR :=
+
+  BOARD_NAME :=
+  UIMAGE_NAME :=
 
   FILESYSTEMS := $(TARGET_FILESYSTEMS)
 endef
 
 DEFAULT_DEVICE_VARS := \
-  DEVICE_NAME KERNEL KERNEL_INITRAMFS KERNEL_INITRAMFS_IMAGE \
-  DEVICE_DTS DEVICE_DTS_DIR \
+  DEVICE_NAME KERNEL KERNEL_INITRAMFS KERNEL_SIZE KERNEL_INITRAMFS_IMAGE \
+  DEVICE_DTS DEVICE_DTS_DIR BOARD_NAME CMDLINE \
   UBOOTENV_IN_UBI KERNEL_IN_UBI \
-  BLOCKSIZE PAGESIZE SUBPAGESIZE \
-  UBINIZE_OPTS
+  BLOCKSIZE PAGESIZE SUBPAGESIZE VID_HDR_OFFSET \
+  UBINIZE_OPTS UIMAGE_NAME UBINIZE_PARTS
 
 define Device/ExportVar
   $(1) : $(2):=$$($(2))
@@ -355,13 +388,22 @@ define Device/Export
 endef
 
 ifdef IB
-  DEVICE_CHECK_PROFILE = $(filter $(1),$(PROFILE))
+  DEVICE_CHECK_PROFILE = $(filter $(1),DEVICE_$(PROFILE) $(PROFILE))
 else
   DEVICE_CHECK_PROFILE = $(CONFIG_TARGET_$(if $(CONFIG_TARGET_MULTI_PROFILE),DEVICE_)$(call target_conf,$(BOARD)$(if $(SUBTARGET),_$(SUBTARGET)))_$(1))
 endif
 
-define Device/Check
+define Device/Check/Common
   _PROFILE_SET = $$(strip $$(foreach profile,$$(PROFILES) DEVICE_$(1),$$(call DEVICE_CHECK_PROFILE,$$(profile))))
+  ifdef TARGET_PER_DEVICE_ROOTFS
+    ROOTFS_ID/$(1) := $$(if $$(_PROFILE_SET),$$(call mkfs_packages_id,$$(DEVICE_PACKAGES)))
+    PACKAGES_$$(ROOTFS_ID/$(1)) := $$(DEVICE_PACKAGES)
+  endif
+endef
+
+define Device/Check
+  $(Device/Check/Common)
+  KDIR_KERNEL_IMAGE := $(KDIR)/$(1)$$(KERNEL_SUFFIX)
   _TARGET := $$(if $$(_PROFILE_SET),install-images,install-disabled)
   ifndef IB
     _COMPILE_TARGET := $$(if $(CONFIG_IB)$$(_PROFILE_SET),compile,compile-disabled)
@@ -383,13 +425,6 @@ define Device/Build/initramfs
 endef
 endif
 
-define Device/Build/check_size
-	@[ $$(($(subst k,* 1024,$(subst m, * 1024k,$(1))))) -ge "$$(stat -c%s $@)" ] || { \
-		echo "WARNING: Image file $@ is too big" >&2; \
-		rm -f $@; \
-	}
-endef
-
 define Device/Build/compile
   $$(_COMPILE_TARGET): $(KDIR)/$(1)
   $(eval $(call Device/Export,$(KDIR)/$(1)))
@@ -399,27 +434,35 @@ define Device/Build/compile
 endef
 
 define Device/Build/kernel
-  _KERNEL_IMAGES += $(KDIR)/$$(KERNEL_NAME)
   $(KDIR)/$$(KERNEL_NAME):: image_prepare
   $$(_TARGET): $$(if $$(KERNEL_INSTALL),$(BIN_DIR)/$$(KERNEL_IMAGE))
-  $(call Device/Export,$(KDIR)/$$(KERNEL_IMAGE),$(1))
-  $(BIN_DIR)/$$(KERNEL_IMAGE): $(KDIR)/$$(KERNEL_IMAGE)
+  $(call Device/Export,$$(KDIR_KERNEL_IMAGE),$(1))
+  $(BIN_DIR)/$$(KERNEL_IMAGE): $$(KDIR_KERNEL_IMAGE)
 	cp $$^ $$@
   ifndef IB
     ifdef CONFIG_IB
-      install: $(KDIR)/$$(KERNEL_IMAGE)
+      install: $$(KDIR_KERNEL_IMAGE)
     endif
-    $(KDIR)/$$(KERNEL_IMAGE): $(KDIR)/$$(KERNEL_NAME) $(CURDIR)/Makefile $$(KERNEL_DEPENDS)
+    $$(KDIR_KERNEL_IMAGE): $(KDIR)/$$(KERNEL_NAME) $(CURDIR)/Makefile $$(KERNEL_DEPENDS)
 	@rm -f $$@
 	$$(call concat_cmd,$$(KERNEL))
-	$$(if $$(KERNEL_SIZE),$$(call Device/Build/check_size,$$(KERNEL_SIZE)))
+	$$(if $$(KERNEL_SIZE),$$(call Build/check-size,$$(KERNEL_SIZE)))
   endif
 endef
 
 define Device/Build/image
   $$(_TARGET): $(BIN_DIR)/$(call IMAGE_NAME,$(1),$(2))
   $(eval $(call Device/Export,$(KDIR)/tmp/$(call IMAGE_NAME,$(1),$(2)),$(1)))
-  $(KDIR)/tmp/$(call IMAGE_NAME,$(1),$(2)): $(KDIR)/$$(KERNEL_IMAGE) $(KDIR)/root.$(1)
+  ROOTFS/$(1)/$(3) := \
+	$(KDIR)/root.$(1)$$(strip \
+		$$(if $$(FS_OPTIONS/$(1)),+fs=$$(call param_mangle,$$(FS_OPTIONS/$(1)))) \
+	)$$(strip \
+		$(if $(TARGET_PER_DEVICE_ROOTFS),+pkg=$$(ROOTFS_ID/$(3))) \
+	)
+  ifndef IB
+    $$(ROOTFS/$(1)/$(3)): $(if $(TARGET_PER_DEVICE_ROOTFS),target-dir-$$(ROOTFS_ID/$(3)))
+  endif
+  $(KDIR)/tmp/$(call IMAGE_NAME,$(1),$(2)): $$(KDIR_KERNEL_IMAGE) $$(ROOTFS/$(1)/$(3))
 	@rm -f $$@
 	[ -f $$(word 1,$$^) -a -f $$(word 2,$$^) ]
 	$$(call concat_cmd,$(if $(IMAGE/$(2)/$(1)),$(IMAGE/$(2)/$(1)),$(IMAGE/$(2))))
@@ -455,7 +498,6 @@ endef
 define Device/Dump
 $$(eval $$(if $$(DEVICE_TITLE),$$(info $$(call Device/DumpInfo,$(1)))))
 endef
-LegacyDevice/Dump = $(Device/Dump)
 
 define Device
   $(call Device/InitProfile,$(1))
@@ -464,42 +506,6 @@ define Device
   $(call Device/$(1),$(1))
   $(call Device/Check,$(1))
   $(call Device/$(if $(DUMP),Dump,Build),$(1))
-
-endef
-
-define LegacyDevice/Check
-  _PROFILE_SET = $$(strip $$(foreach profile,$$(PROFILES) DEVICE_$(1),$$(call DEVICE_CHECK_PROFILE,$$(profile))))
-  _TARGET_PREPARE := $$(if $$(_PROFILE_SET),legacy-images-prepare,prepare-disabled)
-  _TARGET := $$(if $$(_PROFILE_SET),legacy-images,install-disabled)
-  $$(if $$(_PROFILE_SET),install: legacy-images-make)
-  ifndef IB
-    $$(if $$(_PROFILE_SET),mkfs_prepare: legacy-images-prepare-make)
-  endif
-endef
-
-define LegacyDevice/Build
-  $$(_TARGET): legacy-image-$(1)
-  $$(_TARGET_PREPARE): legacy-image-prepare-$(1)
-  .PHONY: legacy-image-prepare-$(1) legacy-image-$(1)
-
-  legacy-image-prepare-$(1):
-	$$(call Image/Prepare/Profile,$(1))
-
-  legacy-image-$(1):
-	$$(call Image/BuildKernel/Profile,$(1))
-	$(foreach fs,$(TARGET_FILESYSTEMS),
-		$$(call Image/Build/Profile,$(1),$(fs))
-	)
-
-endef
-
-define LegacyDevice
-  $(call Device/InitProfile,$(1))
-  $(call Device/Default,$(1))
-  $(call LegacyDevice/Default,$(1))
-  $(call LegacyDevice/$(1),$(1))
-  $(call LegacyDevice/Check,$(1))
-  $(call LegacyDevice/$(if $(DUMP),Dump,Build),$(1))
 
 endef
 
@@ -540,28 +546,28 @@ define BuildImage
   endif
 
   mkfs_prepare: image_prepare
-	$(call Image/mkfs/prepare)
+	$(call Image/mkfs/prepare,$(TARGET_DIR))
 
   kernel_prepare: mkfs_prepare
+	$(call Image/Build/targz)
+	$(call Image/Build/cpiogz)
 	$(call Image/BuildKernel)
 	$(if $(CONFIG_TARGET_ROOTFS_INITRAMFS),$(if $(IB),,$(call Image/BuildKernel/Initramfs)))
 	$(call Image/InstallKernel)
 
   $(foreach device,$(TARGET_DEVICES),$(call Device,$(device)))
   $(foreach device,$(LEGACY_DEVICES),$(call LegacyDevice,$(device)))
-  $(foreach fs,$(TARGET_FILESYSTEMS) $(fs-subtypes-y),$(call BuildImage/mkfs,$(fs)))
 
-  install-images: kernel_prepare
+  install-images: kernel_prepare $(foreach fs,$(filter-out $(if $(UBIFS_OPTS),,ubifs),$(TARGET_FILESYSTEMS) $(fs-subtypes-y)),$(KDIR)/root.$(fs))
 	$(foreach fs,$(TARGET_FILESYSTEMS),
 		$(call Image/Build,$(fs))
 	)
-	$(call Image/mkfs/ubifs)
 
   legacy-images-make: install-images
+	$(call Image/mkfs/ubifs/legacy)
 	$(MAKE) legacy-images
 
   install: install-images
-	$(call Image/Checksum,md5sum --binary,md5sums)
-	$(call Image/Checksum,openssl dgst -sha256,sha256sums)
+	$(call Image/Manifest)
 
 endef

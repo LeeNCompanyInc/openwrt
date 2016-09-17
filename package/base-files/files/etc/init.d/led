@@ -64,7 +64,7 @@ load_led() {
 			}
 			;;
 
-		"timer")
+		"timer"|"oneshot")
 			[ -n "$delayon" ] && \
 				echo $delayon > /sys/class/leds/${sysfs}/delay_on
 			[ -n "$delayoff" ] && \
@@ -81,11 +81,6 @@ load_led() {
 		"port_state")
 			[ -n "$port_state" ] && \
 				echo $port_state > /sys/class/leds/${sysfs}/port_state
-			;;
-
-		"morse")
-			echo $message > /sys/class/leds/${sysfs}/message
-			echo $delay > /sys/class/leds/${sysfs}/delay
 			;;
 
 		"gpio")

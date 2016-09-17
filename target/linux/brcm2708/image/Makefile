@@ -30,7 +30,7 @@ define Build/boot-img
 	mcopy -i $@.boot $(KDIR)/fixup_cd.dat ::
 	mcopy -i $@.boot cmdline.txt ::
 	mcopy -i $@.boot config.txt ::
-	mcopy -i $@.boot $(word 1,$^) ::kernel.img
+	mcopy -i $@.boot $(IMAGE_KERNEL) ::kernel.img
 	$(foreach dts,$(shell echo $(DEVICE_DTS)),mcopy -i $@.boot $(DTS_DIR)/$(dts).dtb ::;)
 	mmd -i $@.boot ::/overlays
 	mcopy -i $@.boot $(DTS_DIR)/overlays/*.dtbo ::/overlays/
@@ -38,7 +38,7 @@ define Build/boot-img
 endef
 
 define Build/sdcard-img
-	./gen_rpi_sdcard_img.sh $@ $@.boot $(word 2,$^) \
+	./gen_rpi_sdcard_img.sh $@ $@.boot $(IMAGE_ROOTFS) \
 		$(CONFIG_BRCM2708_SD_BOOT_PARTSIZE) $(CONFIG_TARGET_ROOTFS_PARTSIZE)
 	$(if $(CONFIG_TARGET_IMAGES_GZIP),gzip -9n -c $@ > $(BIN_DIR)/$(notdir $@).gz)
 endef
@@ -68,9 +68,9 @@ ifeq ($(SUBTARGET),bcm2709)
 endif
 
 define Device/rpi-3
-  DEVICE_TITLE := Raspberry Pi 3 B
-  DEVICE_DTS := bcm2710-rpi-3-b
-  DEVICE_PACKAGES := brcmfmac43430-firmware-sdio kmod-brcmfmac wpad-mini
+  DEVICE_TITLE := Raspberry Pi 3 B/CM
+  DEVICE_DTS := bcm2710-rpi-3-b bcm2710-rpi-cm3
+  DEVICE_PACKAGES := brcmfmac-firmware-43430-sdio kmod-brcmfmac wpad-mini
 endef
 ifeq ($(SUBTARGET),bcm2710)
   TARGET_DEVICES += rpi-3

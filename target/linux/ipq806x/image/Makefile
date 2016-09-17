@@ -40,11 +40,7 @@ define Device/Default
 	KERNEL_DEPENDS = $$(wildcard $(DTS_DIR)/$$(DEVICE_DTS).dts)
 	KERNEL_INITRAMFS_PREFIX := $$(IMG_PREFIX)-$(1)-initramfs
 	KERNEL_PREFIX := $$(IMAGE_PREFIX)
-	IMAGES :=
-	KERNEL_IN_UBI :=
-	BOARD_NAME :=
 endef
-DEVICE_VARS += BOARD_NAME KERNEL_SIZE
 
 define Device/LegacyImage
 	KERNEL_SUFFIX := -uImage
@@ -62,7 +58,7 @@ define Device/UbiFit
 	KERNEL_IN_UBI := 1
 	IMAGES := nand-factory.ubi nand-sysupgrade.tar
 	IMAGE/nand-factory.ubi := append-ubi
-	IMAGE/nand-sysupgrade.tar := sysupgrade-nand
+	IMAGE/nand-sysupgrade.tar := sysupgrade-tar
 endef
 
 define Device/DniImage
@@ -76,7 +72,7 @@ define Device/DniImage
 	NETGEAR_HW_ID :=
 	IMAGES := factory.img sysupgrade.tar
 	IMAGE/factory.img := append-kernel | append-ubi | netgear-dni
-	IMAGE/sysupgrade.tar = sysupgrade-nand
+	IMAGE/sysupgrade.tar = sysupgrade-tar
 endef
 DEVICE_VARS += NETGEAR_BOARD_ID NETGEAR_HW_ID
 
@@ -97,7 +93,7 @@ define Device/AP148
 	$(call Device/FitImage)
 	$(call Device/UbiFit)
 	DEVICE_DTS := qcom-ipq8064-ap148
-	BLOCKSIZE := 128KiB
+	BLOCKSIZE := 128k
 	PAGESIZE := 2048
 	BOARD_NAME := ap148
 	DEVICE_TITLE := Qualcomm AP148
@@ -108,7 +104,7 @@ define Device/AP148-legacy
 	$(call Device/LegacyImage)
 	$(call Device/UbiFit)
 	DEVICE_DTS := qcom-ipq8064-ap148
-	BLOCKSIZE := 128KiB
+	BLOCKSIZE := 128k
 	PAGESIZE := 2048
 	BOARD_NAME := ap148
 	DEVICE_TITLE := Qualcomm AP148 (legacy)
@@ -118,7 +114,7 @@ endef
 define Device/C2600
 	$(call Device/TpSafeImage)
 	DEVICE_DTS := qcom-ipq8064-c2600
-	BLOCKSIZE := 128KiB
+	BLOCKSIZE := 128k
 	PAGESIZE := 2048
 	BOARD_NAME := c2600
 	TPLINK_BOARD_NAME := C2600
@@ -132,7 +128,7 @@ define Device/D7800
 	KERNEL_SIZE := 2097152
 	NETGEAR_BOARD_ID := D7800
 	NETGEAR_HW_ID := 29764958+0+128+512+4x4+4x4
-	BLOCKSIZE := 128KiB
+	BLOCKSIZE := 128k
 	PAGESIZE := 2048
 	BOARD_NAME := d7800
 	DEVICE_TITLE := Netgear Nighthawk X4 D7800
@@ -152,15 +148,15 @@ define Device/EA8500
 	$(call Device/LegacyImage)
 	DEVICE_DTS := qcom-ipq8064-ea8500
 	PAGESIZE := 2048
-	BLOCKSIZE := 128KiB
-	KERNEL_SIZE := 3145728
+	BLOCKSIZE := 128k
+	KERNEL_SIZE := 3072k
 	FILESYSTEMS := squashfs
 	KERNEL = kernel-bin | append-dtb | uImage none | append-file $(KDIR)/root.dummy
 	PROFILES += $$(DEVICE_NAME)
 	BOARD_NAME := ea8500
 	IMAGES := factory.bin sysupgrade.tar
-	IMAGE/factory.bin := append-kernel 3145728 | append-ubi
-	IMAGE/sysupgrade.tar := sysupgrade-nand
+	IMAGE/factory.bin := append-kernel | pad-to $$$${KERNEL_SIZE} | append-ubi
+	IMAGE/sysupgrade.tar := sysupgrade-tar
 	DEVICE_TITLE := Linksys EA8500
 	DEVICE_PACKAGES := ath10k-firmware-qca99x0
 endef
@@ -171,26 +167,39 @@ define Device/R7500
 	KERNEL_SIZE := 2097152
 	NETGEAR_BOARD_ID := R7500
 	NETGEAR_HW_ID := 29764841+0+128+256+3x3+4x4
-	BLOCKSIZE := 128KiB
+	BLOCKSIZE := 128k
 	PAGESIZE := 2048
 	BOARD_NAME := r7500
 	DEVICE_TITLE := Netgear Nighthawk X4 R7500
 	DEVICE_PACKAGES := ath10k-firmware-qca99x0
 endef
 
+define Device/R7500v2
+	$(call Device/DniImage)
+	DEVICE_DTS := qcom-ipq8064-r7500v2
+	KERNEL_SIZE := 2097152
+	NETGEAR_BOARD_ID := R7500v2
+	NETGEAR_HW_ID := 29764958+0+128+512+3x3+4x4
+	BLOCKSIZE := 128k
+	PAGESIZE := 2048
+	BOARD_NAME := r7500v2
+	DEVICE_TITLE := Netgear Nighthawk X4 R7500v2
+	DEVICE_PACKAGES := ath10k-firmware-qca99x0
+endef
+
 define Device/R7800
 	$(call Device/DniImage)
-	DEVICE_DTS := qcom-ipq8064-r7800
+	DEVICE_DTS := qcom-ipq8065-r7800
 	KERNEL_SIZE := 2097152
 	NETGEAR_BOARD_ID := R7800
 	NETGEAR_HW_ID := 29764958+0+128+512+4x4+4x4+cascade
-	BLOCKSIZE := 128KiB
+	BLOCKSIZE := 128k
 	PAGESIZE := 2048
 	BOARD_NAME := r7800
 	DEVICE_TITLE := Netgear Nighthawk X4S R7800
 	DEVICE_PACKAGES := ath10k-firmware-qca9984
 endef
 
-TARGET_DEVICES += AP148 AP148-legacy C2600 D7800 DB149 EA8500 R7500 R7800
+TARGET_DEVICES += AP148 AP148-legacy C2600 D7800 DB149 EA8500 R7500 R7500v2 R7800
 
 $(eval $(call BuildImage))

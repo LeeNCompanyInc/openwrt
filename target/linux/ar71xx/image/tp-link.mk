@@ -12,7 +12,7 @@ define Build/mktplinkfw
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
 		-H $(TPLINK_HWID) -W $(TPLINK_HWREV) -F $(TPLINK_FLASHLAYOUT) -N OpenWrt -V $(REVISION) \
 		-m $(TPLINK_HEADER_VERSION) \
-		-k $(word 1,$^) \
+		-k $(IMAGE_KERNEL) \
 		-r $@ \
 		-o $@.new \
 		-j -X 0x40000 \
@@ -111,41 +111,54 @@ TARGET_DEVICES += cpe210-220 cpe510-520
 
 define Device/tl-wdr4300-v1
 $(Device/tplink-8mlzma)
-  DEVICE_TITLE := TP-LINK TL-WDR4300
+  DEVICE_TITLE := TP-LINK TL-WDR4300 v1
   DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev
-  BOARDNAME = TL-WDR4300
-  DEVICE_PROFILE = TLWDR4300
+  BOARDNAME := TL-WDR4300
+  DEVICE_PROFILE := TLWDR4300
   TPLINK_HWID := 0x43000001
+  IMAGE/factory.bin := append-rootfs | mktplinkfw factory -C US
 endef
 
 define Device/tl-wdr3500-v1
-$(Device/tl-wdr4300-v1)
+$(Device/tplink-8mlzma)
   DEVICE_TITLE := TP-LINK TL-WDR3500 v1
-  BOARDNAME = TL-WDR3500
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev
+  BOARDNAME := TL-WDR3500
+  DEVICE_PROFILE := TLWDR4300
   TPLINK_HWID := 0x35000001
 endef
 
 define Device/tl-wdr3600-v1
-$(Device/tl-wdr4300-v1)
+$(Device/tplink-8mlzma)
   DEVICE_TITLE := TP-LINK TL-WDR3600 v1
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev
+  BOARDNAME := TL-WDR4300
+  DEVICE_PROFILE := TLWDR4300
   TPLINK_HWID := 0x36000001
+  IMAGE/factory.bin := append-rootfs | mktplinkfw factory -C US
 endef
 
 define Device/tl-wdr4300-v1-il
-$(Device/tl-wdr4300-v1)
+$(Device/tplink-8mlzma)
   DEVICE_TITLE := TP-LINK TL-WDR4300 v1 IL
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev
+  BOARDNAME := TL-WDR4300
+  DEVICE_PROFILE := TLWDR4300
   TPLINK_HWID := 0x43008001
 endef
 
 define Device/tl-wdr4310-v1
-$(Device/tl-wdr4300-v1)
+$(Device/tplink-8mlzma)
   DEVICE_TITLE := TP-LINK TL-WDR4310 v1
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev
+  BOARDNAME := TL-WDR4300
+  DEVICE_PROFILE = TLWDR4300
   TPLINK_HWID := 0x43100001
 endef
 
 define Device/mw4530r-v1
 $(Device/tl-wdr4300-v1)
-  DEVICE_TITLE := TP-LINK TL-WDR4530 v1
+  DEVICE_TITLE := Mercury MW4530R v1
   TPLINK_HWID := 0x45300001
 endef
 TARGET_DEVICES += tl-wdr3500-v1 tl-wdr3600-v1 tl-wdr4300-v1 tl-wdr4300-v1-il tl-wdr4310-v1 mw4530r-v1
@@ -153,7 +166,7 @@ TARGET_DEVICES += tl-wdr3500-v1 tl-wdr3600-v1 tl-wdr4300-v1 tl-wdr4300-v1-il tl-
 define Device/tl-wdr6500-v2
 $(Device/tplink-8mlzma)
   DEVICE_TITLE := TP-LINK TL-WDR6500v2
-  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k ath10k-firmware-qca988x
   KERNEL := kernel-bin | patch-cmdline | lzma | uImage lzma
   KERNEL_INITRAMFS := kernel-bin | patch-cmdline | lzma | uImage lzma | mktplinkfw-initramfs
   BOARDNAME = TL-WDR6500-v2
@@ -177,7 +190,7 @@ TARGET_DEVICES += tl-wdr3320-v2
 define Device/archer-c5-v1
     $(Device/tplink-16mlzma)
     DEVICE_TITLE := TP-LINK Archer C5
-    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k
+    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k ath10k-firmware-qca988x
     BOARDNAME := ARCHER-C5
     DEVICE_PROFILE := ARCHERC7
     TPLINK_HWID := 0xc5000001
@@ -186,7 +199,7 @@ endef
 define Device/archer-c7-v1
     $(Device/tplink-8mlzma)
     DEVICE_TITLE := TP-LINK Archer C7 v1
-    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k
+    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k ath10k-firmware-qca988x
     BOARDNAME := ARCHER-C7
     DEVICE_PROFILE := ARCHERC7
     TPLINK_HWID := 0x75000001
@@ -195,17 +208,19 @@ endef
 define Device/archer-c7-v2
     $(Device/tplink-16mlzma)
     DEVICE_TITLE := TP-LINK Archer C7 v2
-    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k
+    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k ath10k-firmware-qca988x
     BOARDNAME := ARCHER-C7-V2
     DEVICE_PROFILE := ARCHERC7
     TPLINK_HWID := 0xc7000002
-    IMAGE/factory.bin := append-rootfs | mktplinkfw factory -C US
+    IMAGES := sysupgrade.bin factory.bin factory-us.bin factory-eu.bin
+    IMAGE/factory-us.bin := append-rootfs | mktplinkfw factory -C US
+    IMAGE/factory-eu.bin := append-rootfs | mktplinkfw factory -C EU
 endef
 
 define Device/tl-wdr7500-v3
     $(Device/tplink-8mlzma)
     DEVICE_TITLE := TP-LINK Archer C7 v3
-    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k
+    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k ath10k-firmware-qca988x
     BOARDNAME := ARCHER-C7
     DEVICE_PROFILE := ARCHERC7
     TPLINK_HWID := 0x75000003
@@ -869,4 +884,3 @@ define Device/tl-wa7210n-v2
     CONSOLE := ttyATH0,115200
 endef
 TARGET_DEVICES += tl-wa7210n-v2
-

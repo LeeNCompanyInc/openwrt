@@ -4,9 +4,8 @@
 
 SUBTARGET:=mt7621
 BOARDNAME:=MT7621 based boards
-FEATURES+=usb rtc
-CPU_TYPE:=1004kc
-CPU_SUBTYPE:=dsp
+FEATURES+=usb rtc nand
+CPU_TYPE:=24kc
 
 DEFAULT_PACKAGES += kmod-mt76
 
