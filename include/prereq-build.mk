@@ -39,10 +39,11 @@ $(eval $(call Require,case-sensitive-fs, \
 ))
 
 define Require/getopt
+	/usr/local/opt/gnu-getopt/bin/getopt --help 2>&1 | grep long >/dev/null || \
 	gnugetopt --help 2>&1 | grep long >/dev/null || \
-	/usr/local/bin/getopt --help 2>&1 | grep long >/dev/null || \
 	getopt --help 2>&1 | grep long >/dev/null
 endef
+
 $(eval $(call Require,getopt, \
 	Please install GNU getopt \
 ))
@@ -194,7 +195,7 @@ $(eval $(call RequireCommand,file, \
 
 define Require/gettext
 	msgfmt --help >/dev/null || \
-	/usr/local/bin/msgfmt --help >/dev/null
+	/usr/local/opt/gettext/bin/msgfmt --help >/dev/null
 endef
 
 $(eval $(call Require,gettext, \
