@@ -292,6 +292,8 @@ platform_check_image() {
 
 		return 0;
 		;;
+	mr1750 | \
+	mr1750v2 | \
 	mr600 | \
 	mr600v2 | \
 	mr900 | \
@@ -300,9 +302,12 @@ platform_check_image() {
 	om2pv2 | \
 	om2p-hs | \
 	om2p-hsv2 | \
+	om2p-hsv3 | \
 	om2p-lc | \
 	om5p | \
-	om5p-an)
+	om5p-an | \
+	om5p-ac | \
+	om5p-acv2)
 		platform_check_image_openmesh "$magic_long" "$1" && return 0
 		return 1
 		;;
@@ -520,6 +525,8 @@ platform_do_upgrade() {
 	tew-673gru)
 		platform_do_upgrade_dir825b "$ARGV"
 		;;
+	mr1750 | \
+	mr1750v2 | \
 	mr600 | \
 	mr600v2 | \
 	mr900 | \
@@ -528,9 +535,12 @@ platform_do_upgrade() {
 	om2pv2 | \
 	om2p-hs | \
 	om2p-hsv2 | \
+	om2p-hsv3 | \
 	om2p-lc | \
 	om5p | \
-	om5p-an)
+	om5p-an | \
+	om5p-ac | \
+	om5p-acv2)
 		platform_do_upgrade_openmesh "$ARGV"
 		;;
 	unifi-outdoor-plus | \
