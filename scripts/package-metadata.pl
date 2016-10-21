@@ -193,12 +193,15 @@ sub mconf_depends {
 
 			$m = "select";
 			next if $only_dep;
+
+			$flags =~ /@/ or $depend = "PACKAGE_$depend";
 		} else {
 			if ($vdep = $package{$depend}->{vdepends}) {
 				$depend = join("||", map { "PACKAGE_".$_ } @$vdep);
+			} else {
+				$flags =~ /@/ or $depend = "PACKAGE_$depend";
 			}
 		}
-		$flags =~ /@/ or $depend = "PACKAGE_$depend";
 		if ($condition) {
 			if ($m =~ /select/) {
 				next if $depend eq $condition;
@@ -348,7 +351,7 @@ sub print_package_overrides() {
 	keys %overrides > 0 or return;
 	print "\tconfig OVERRIDE_PKGS\n";
 	print "\t\tstring\n";
-	print "\t\tdefault \"".join(" ", keys %overrides)."\"\n\n";
+	print "\t\tdefault \"".join(" ", sort keys %overrides)."\"\n\n";
 }
 
 sub gen_package_config() {

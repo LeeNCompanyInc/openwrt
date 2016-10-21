@@ -27,6 +27,16 @@ define Device/cf-e316n-v2
 endef
 TARGET_DEVICES += cf-e316n-v2
 
+define Device/dragino2
+  BOARDNAME := DRAGINO2
+  CONSOLE := ttyATH0,115200
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
+  DEVICE_TITLE := Dragino 2 (MS14)
+  IMAGE_SIZE := 16000k
+  MTDPARTS := spi0.0:256k(u-boot)ro,16000k(firmware),64k(config)ro,64k(art)ro
+endef
+TARGET_DEVICES += dragino2
+
 define Device/weio
   DEVICE_TITLE := WeIO
   DEVICE_PACKAGES := kmod-usb-core kmod-usb2
@@ -98,7 +108,7 @@ TARGET_DEVICES += dr531
 
 define Device/wndr3700
   DEVICE_TITLE := NETGEAR WNDR3700
-  DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-ledtrig-usbdev kmod-leds-wndr3700-usb
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport kmod-leds-wndr3700-usb
   BOARDNAME = WNDR3700
   NETGEAR_KERNEL_MAGIC = 0x33373030
   NETGEAR_BOARD_ID = WNDR3700
@@ -196,7 +206,7 @@ TARGET_DEVICES += cr3000-nocloud
 
 define Device/cr5000
   DEVICE_TITLE := PowerCloud CR5000 Cloud Router
-  DEVICE_PACKAGES := uboot-envtools kmod-usb2 kmod-usb-ohci kmod-ledtrig-usbdev kmod-usb-core
+  DEVICE_PACKAGES := uboot-envtools kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport kmod-usb-core
   BOARDNAME := CR5000
   DEVICE_PROFILE := CR5000
   IMAGE_SIZE = 7104k
@@ -207,7 +217,7 @@ TARGET_DEVICES += cr5000
 
 define Device/cr5000-nocloud
   DEVICE_TITLE := PowerCloud CR5000 (No-Cloud)
-  DEVICE_PACKAGES := uboot-envtools kmod-usb2 kmod-usb-ohci kmod-ledtrig-usbdev kmod-usb-core
+  DEVICE_PACKAGES := uboot-envtools kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport kmod-usb-core
   BOARDNAME := CR5000
   DEVICE_PROFILE := CR5000
   IMAGE_SIZE = 7808k
@@ -320,7 +330,7 @@ TARGET_DEVICES += mc-mac1200r
 define Device/minibox-v1
   $(Device/tplink-16mlzma)
   DEVICE_TITLE := Gainstrong MiniBox V1.0
-  DEVICE_PACKAGES := kmod-usb-core kmod-usb2  kmod-ledtrig-usbdev
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb2  kmod-usb-ledtrig-usbport
   BOARDNAME := MINIBOX-V1
   DEVICE_PROFILE := MINIBOXV1
   TPLINK_HWID := 0x3C000201
@@ -391,7 +401,7 @@ TARGET_DEVICES += tellstick-znet-lite
 define Device/oolite
   $(Device/tplink-16mlzma)
   DEVICE_TITLE := Gainstrong OOLITE
-  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
   BOARDNAME := GS-OOLITE
   DEVICE_PROFILE := OOLITE
   TPLINK_HWID := 0x3C000101
@@ -402,7 +412,7 @@ TARGET_DEVICES += oolite
 
 define Device/NBG6616
   DEVICE_TITLE := ZyXEL NBG6616
-  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-usb-storage kmod-rtc-pcf8563 kmod-ath10k ath10k-firmware-qca988x
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport kmod-usb-storage kmod-rtc-pcf8563 kmod-ath10k ath10k-firmware-qca988x
   BOARDNAME = NBG6616
   KERNEL_SIZE = 2048k
   IMAGE_SIZE = 15323k
@@ -472,53 +482,51 @@ endef
 TARGET_DEVICES += hiwifi-hc6361
 
 
-# The pre-filled 64 bytes consist of
-# - 28 bytes seama_header
-# - 36 bytes of META data (4-bytes aligned)
-define Build/seama-factory
-	( dd if=/dev/zero bs=64 count=1; cat $(IMAGE_KERNEL) ) >$@.loader.tmp
-	( dd if=$@.loader.tmp bs=64k conv=sync; dd if=$(IMAGE_ROOTFS) ) >$@.tmp.0
-	tail -c +65 $@.tmp.0 >$@.tmp.1
-	$(STAGING_DIR_HOST)/bin/seama \
-		-i $@.tmp.1 \
-		-m "dev=/dev/mtdblock/1" -m "type=firmware"
-	$(STAGING_DIR_HOST)/bin/seama \
-		-s $@ \
-		-m "signature=$(1)" \
-		-i $@.tmp.1.seama
-	rm -f $@.loader.tmp $@.tmp.*
-endef
-
-define Build/seama-sysupgrade
-	$(STAGING_DIR_HOST)/bin/seama \
-		-i $(IMAGE_KERNEL) \
-		-m "dev=/dev/mtdblock/1" -m "type=firmware"
-	( dd if=$(IMAGE_KERNEL).seama bs=64k conv=sync; dd if=$(IMAGE_ROOTFS) ) >$@
-	rm -f $(IMAGE_KERNEL).seama
-endef
-
-define Build/seama-initramfs
-	$(STAGING_DIR_HOST)/bin/seama \
-		-i $@ \
-		-m "dev=/dev/mtdblock/1" -m "type=firmware"
+define Build/seama
+	$(STAGING_DIR_HOST)/bin/seama -i $@ $(if $(1),$(1),-m "dev=/dev/mtdblock/1" -m "type=firmware")
 	mv $@.seama $@
 endef
 
-define Build/seama-pad-rootfs
-	$(STAGING_DIR_HOST)/bin/padjffs2 $(IMAGE_ROOTFS) -c 64 >>$@
+define Build/seama-seal
+	$(call Build/seama,-s $@.seama $(1))
 endef
 
 define Device/seama
   CONSOLE := ttyS0,115200
   LOADER_TYPE := bin
-  KERNEL := kernel-bin | lzma | loader-kernel-cmdline | lzma
-  KERNEL_INITRAMFS := kernel-bin | patch-cmdline | lzma | seama-initramfs
+  BLOCKSIZE := 64k
+  KERNEL := kernel-bin | patch-cmdline | relocate-kernel | lzma
+  KERNEL_INITRAMFS := kernel-bin | patch-cmdline | lzma | seama
   KERNEL_INITRAMFS_SUFFIX = $$(KERNEL_SUFFIX).seama
   IMAGES := sysupgrade.bin factory.bin
-  IMAGE/sysupgrade.bin := seama-sysupgrade $$$$(SEAMA_SIGNATURE) | seama-pad-rootfs | check-size $$$$(IMAGE_SIZE)
-  IMAGE/factory.bin := seama-factory $$$$(SEAMA_SIGNATURE) | seama-pad-rootfs | check-size $$$$(IMAGE_SIZE)
+
+  # 64 bytes offset:
+  # - 28 bytes seama_header
+  # - 36 bytes of META data (4-bytes aligned)
+  IMAGE/default := append-kernel | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs
+  IMAGE/sysupgrade.bin := \
+	$$(IMAGE/default) | seama | pad-rootfs | \
+	check-size $$$$(IMAGE_SIZE)
+  IMAGE/factory.bin := \
+	$$(IMAGE/default) | seama | pad-rootfs | \
+	seama-seal -m "signature=$$$$(SEAMA_SIGNATURE)" | \
+	check-size $$$$(IMAGE_SIZE)
   SEAMA_SIGNATURE :=
   DEVICE_VARS += SEAMA_SIGNATURE
+endef
+
+define Device/dir-869-a1
+$(Device/seama)
+  DEVICE_TITLE := D-Link DIR-869 rev. A1
+  DEVICE_PACKAGES := kmod-ath10k ath10k-firmware-qca988x
+  BOARDNAME = DIR-869-A1
+  IMAGE_SIZE = 15872k
+  MTDPARTS = spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,64k(devdata)ro,64k(devconf)ro,15872k(firmware),64k(radiocfg)ro
+  SEAMA_SIGNATURE := wrgac54_dlink.2015_dir869
+  IMAGE/factory.bin := \
+	$$(IMAGE/default) | pad-rootfs -x 64 | \
+	seama | seama-seal -m "signature=$$$$(SEAMA_SIGNATURE)" | \
+	check-size $$$$(IMAGE_SIZE)
 endef
 
 define Device/mynet-n600
@@ -544,11 +552,11 @@ endef
 define Device/qihoo-c301
 $(Device/seama)
   DEVICE_TITLE := Qihoo C301
-  DEVICE_PACKAGES :=  kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k ath10k-firmware-qca988x
+  DEVICE_PACKAGES :=  kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport kmod-ath10k ath10k-firmware-qca988x
   BOARDNAME = QIHOO-C301
   IMAGE_SIZE = 15744k
   MTDPARTS = spi0.0:256k(u-boot)ro,64k(u-boot-env),64k(devdata),64k(devconf),15744k(firmware),64k(warm_start),64k(action_image_config),64k(radiocfg)ro;spi0.1:15360k(upgrade2),1024k(privatedata)
   SEAMA_SIGNATURE := wrgac26_qihoo360_360rg
 endef
 
-TARGET_DEVICES += mynet-n600 mynet-n750 qihoo-c301
+TARGET_DEVICES += dir-869-a1 mynet-n600 mynet-n750 qihoo-c301

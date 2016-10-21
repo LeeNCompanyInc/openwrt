@@ -225,7 +225,7 @@ define Device/hc5661
   DTS := HC5661
   IMAGE_SIZE := $(ralink_default_fw_size_16M)
   DEVICE_TITLE := HiWiFi HC5661
-  DEVICE_PACKAGES := kmod-usb2 kmod-sdhci kmod-sdhci-mt7620 kmod-ledtrig-usbdev
+  DEVICE_PACKAGES := kmod-usb2 kmod-sdhci kmod-sdhci-mt7620 kmod-usb-ledtrig-usbport
 endef
 TARGET_DEVICES += hc5661
 
@@ -233,7 +233,7 @@ define Device/hc5761
   DTS := HC5761
   IMAGE_SIZE := $(ralink_default_fw_size_16M)
   DEVICE_TITLE := HiWiFi HC5761 
-  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-sdhci kmod-sdhci-mt7620 kmod-ledtrig-usbdev
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-sdhci kmod-sdhci-mt7620 kmod-usb-ledtrig-usbport
 endef
 TARGET_DEVICES += hc5761
 
@@ -241,7 +241,7 @@ define Device/hc5861
   DTS := HC5861
   IMAGE_SIZE := $(ralink_default_fw_size_16M)
   DEVICE_TITLE := HiWiFi HC5861
-  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-sdhci kmod-sdhci-mt7620 kmod-ledtrig-usbdev
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-sdhci kmod-sdhci-mt7620 kmod-usb-ledtrig-usbport
 endef
 TARGET_DEVICES += hc5861
 
@@ -258,6 +258,13 @@ define Device/psg1208
   DEVICE_PACKAGES := kmod-mt76
 endef
 TARGET_DEVICES += psg1208
+
+define Device/psg1218
+  DTS := PSG1218
+  DEVICE_TITLE := Phicomm PSG1218
+  DEVICE_PACKAGES := kmod-mt76
+endef
+TARGET_DEVICES += psg1218
 
 define Device/y1
   DTS := Y1
@@ -357,6 +364,13 @@ define Device/zbt-ape522ii
   DEVICE_PACKAGES := kmod-mt76
 endef
 TARGET_DEVICES += zbt-ape522ii
+
+define Device/zbt-cpe102
+  DTS := ZBT-CPE102
+  DEVICE_TITLE := Zbtlink ZBT-CPE102
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci
+endef
+TARGET_DEVICES += zbt-cpe102
 
 define Device/zbt-wa05
   DTS := ZBT-WA05

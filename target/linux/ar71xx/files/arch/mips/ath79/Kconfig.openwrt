@@ -210,6 +210,18 @@ config ATH79_MACH_C55
 	select ATH79_DEV_M25P80
 	select ATH79_DEV_WMAC
 
+config ATH79_MACH_C60
+	bool "AirTight Networks C-60 support"
+	select SOC_AR934X
+	select ATH79_DEV_AP9X_PCI if PCI
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_M25P80
+	select ATH79_DEV_WMAC
+	select ATH79_DEV_NFC
+	select ATH79_DEV_USB
+
 config ATH79_MACH_AW_NR580
 	bool "AzureWave AW-NR580 board support"
 	select SOC_AR71XX
@@ -479,6 +491,16 @@ config ATH79_MACH_DIR_825_C1
 	select ATH79_DEV_USB
 	select ATH79_DEV_WMAC
 
+config ATH79_MACH_DIR_869_A1
+	bool "D-Link DIR-869 rev. A1"
+	select SOC_QCA956X
+	select ATH79_DEV_AP9X_PCI if PCI
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_M25P80
+	select ATH79_DEV_WMAC
+
 config ATH79_MACH_DLAN_HOTSPOT
 	bool "devolo dLAN Hotspot support"
 	select SOC_AR933X
@@ -642,6 +664,15 @@ config ATH79_MACH_GL_INET
 	select ATH79_DEV_LEDS_GPIO
 	select ATH79_DEV_M25P80
 	select ATH79_DEV_USB
+	select ATH79_DEV_WMAC
+
+config ATH79_MACH_EAP120
+	bool "TP-LINK EAP120 support"
+	select SOC_AR934X
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_M25P80
 	select ATH79_DEV_WMAC
 
 config ATH79_MACH_EAP300V2
@@ -1551,6 +1582,18 @@ config ATH79_MACH_MYNET_REXT
 	select ATH79_DEV_M25P80
 	select ATH79_DEV_WMAC
 	select ATH79_NVRAM
+
+config ATH79_MACH_Z1
+	bool "Meraki Z1 board support"
+	select SOC_AR934X
+	select ATH79_DEV_AP9X_PCI if PCI
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_NFC
+	select ATH79_DEV_USB
+	select ATH79_DEV_WMAC
+	select LEDS_NU801
 
 config ATH79_MACH_ZBT_WE1526
 	bool "Zbtlink ZBT-WE1526 board support"

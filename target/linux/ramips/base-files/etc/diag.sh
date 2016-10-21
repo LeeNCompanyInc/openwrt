@@ -27,13 +27,18 @@ get_status_led() {
 	mzk-dp150n|\
 	mzk-w300nh2|\
 	nbg-419n|\
+	nbg-419n2|\
 	pwh2004|\
+	vr500|\
 	wnce2001|\
 	wndr3700v5|\
 	x5|\
 	x8|\
 	xdxrn502j)
 		status_led="$board:green:power"
+		;;
+	3g-6200nl)
+		status_led="$board:green:internet"
 		;;
 	a5-v11|\
 	cs-qr10|\
@@ -93,6 +98,9 @@ get_status_led() {
 	psg1208)
 		status_led="$board:white:wps"
 		;;
+	psg1218)
+		status_led="$board:blue:status"
+		;;
 	cy-swr1100|\
 	w502u)
 		status_led="$board:blue:wps"
@@ -113,7 +121,8 @@ get_status_led() {
 		status_led="$board:blue:power"
 		;;
 	db-wrt01|\
-	esr-9753)
+	esr-9753|\
+	pbr-d1)
 		status_led="$board:orange:power"
 		;;
 	f5d8235-v2)
@@ -142,6 +151,7 @@ get_status_led() {
 		status_led="$board:blue:status"
 		;;
 	miwifi-mini|\
+	miwifi-nano|\
 	zte-q7)
 		status_led="$board:red:status"
 		;;
@@ -150,6 +160,9 @@ get_status_led() {
 		;;
 	nw718)
 		status_led="$board:amber:cpu"
+		;;
+	newifi-d1)
+		status_led="$board:blue:status"
 		;;
 	oy-0001|\
 	sl-r7205|\
@@ -207,6 +220,9 @@ get_status_led() {
 	wrtnode2p | \
 	wrtnode)
 		status_led="wrtnode:blue:indicator"
+		;;
+	zbt-cpe102)
+		status_led="$board:green:4g-0"
 		;;
 	esac
 }
