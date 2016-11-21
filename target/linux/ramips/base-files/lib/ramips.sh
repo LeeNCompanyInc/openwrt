@@ -124,6 +124,9 @@ ramips_board_detect() {
 	*"DCS-930L B1")
 		name="dcs-930l-b1"
 		;;
+	*"Digineo AC1200 Pro")
+		name="ac1200pro"
+		;;
 	*"DIR-300 B1")
 		name="dir-300-b1"
 		;;
@@ -376,6 +379,9 @@ ramips_board_detect() {
 	*"Q7")
 		name="zte-q7"
 		;;
+	*"RB750Gr3")
+		name="rb750gr3"
+		;;
 	*"RE6500")
 		name="re6500"
 		;;
@@ -505,8 +511,14 @@ ramips_board_detect() {
 	*"WL-351 v1 002")
 		name="wl-351"
 		;;
+	*"WL-WN575A3")
+		name="wl-wn575a3"
+		;;
 	*"WLI-TX4-AG300N")
 		name="wli-tx4-ag300n"
+		;;
+	*"WLR-6000")
+		name="wlr-6000"
 		;;
 	*"WMR-300")
 		name="wmr-300"
@@ -582,6 +594,9 @@ ramips_board_detect() {
 		;;
 	*"ZBT-WR8305RT")
 		name="zbt-wr8305rt"
+		;;
+	*"ZyXEL Keenetic Viva")
+		name="kng_rc"
 		;;
 	*"YK1")
 		name="youku-yk1"

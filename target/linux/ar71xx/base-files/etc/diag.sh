@@ -43,7 +43,8 @@ get_status_led() {
 	ap83|\
 	mr12|\
 	mr16|\
-	nbg6616)
+	nbg6616|\
+	tl-wpa8630)
 		status_led="$board:green:power"
 		;;
 	ap96)
@@ -51,6 +52,11 @@ get_status_led() {
 		;;
 	aw-nr580)
 		status_led="$board:green:ready"
+		;;
+	bhr-4grv2|\
+	wzr-hp-ag300h|\
+	wzr-hp-g300nh2)
+		status_led="buffalo:red:diag"
 		;;
 	bsb)
 		status_led="$board:red:sys"
@@ -129,6 +135,9 @@ get_status_led() {
 	dragino2|\
 	oolite)
 		status_led="$board:red:system"
+		;;
+	dw33d)
+		status_led="$board:blue:status"
 		;;
 	eap120)
 		status_led="$(ar71xx_board_name):green:system"
@@ -348,6 +357,7 @@ get_status_led() {
 	tl-wr703n|\
 	tl-wr710n|\
 	tl-wr720n-v3|\
+	tl-wr802n-v1|\
 	tl-wr810n|\
 	tl-wr941nd-v6)
 		status_led="tp-link:blue:system"
@@ -387,10 +397,6 @@ get_status_led() {
 		;;
 	wlae-ag300n)
 		status_led="buffalo:green:status"
-		;;
-	wzr-hp-ag300h|\
-	wzr-hp-g300nh2)
-		status_led="buffalo:red:diag"
 		;;
 	r6100|\
 	wndap360|\

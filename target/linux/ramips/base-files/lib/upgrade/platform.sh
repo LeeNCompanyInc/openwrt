@@ -17,6 +17,7 @@ platform_check_image() {
 	3g150b|\
 	3g300m|\
 	a5-v11|\
+	ac1200pro|\
 	ai-br100|\
 	air3gii|\
 	all0239-3g|\
@@ -69,6 +70,7 @@ platform_check_image() {
 	jhr-n805r|\
 	jhr-n825r|\
 	jhr-n926r|\
+	kng_rc|\
 	linkits7688|\
 	linkits7688d|\
 	m2m|\
@@ -105,6 +107,7 @@ platform_check_image() {
 	psg1218|\
 	psr-680w|\
 	px-4885|\
+	rb750gr3|\
 	re6500|\
 	rp-n53|\
 	rt5350f-olinuxino|\
@@ -144,7 +147,9 @@ platform_check_image() {
 	wl-330n3g|\
 	wl-341v3|\
 	wl-351|\
+	wl-wn575a3|\
 	wli-tx4-ag300n|\
+	wlr-6000|\
 	wmr-300|\
 	wnce2001|\
 	wndr3700v5|\

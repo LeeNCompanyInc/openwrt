@@ -371,6 +371,16 @@ define Device/tl-mr3420-v2
 endef
 TARGET_DEVICES += tl-mr3020-v1 tl-mr3040-v1 tl-mr3040-v2 tl-mr3220-v1 tl-mr3220-v2 tl-mr3420-v1 tl-mr3420-v2
 
+define Device/tl-wpa8630
+    $(Device/tplink-8mlzma)
+    DEVICE_TITLE := TP-LINK TL-WPA8630
+    DEVICE_PACKAGES := kmod-ath10k ath10k-firmware-qca988x
+    BOARDNAME := TL-WPA8630
+    DEVICE_PROFILE := TL-WPA8630
+    TPLINK_HWID := 0x86300001
+endef
+TARGET_DEVICES += tl-wpa8630
+
 define Device/tl-wr703n-v1
     $(Device/tplink-4mlzma)
     DEVICE_TITLE := TP-LINK TL-WR703N
@@ -537,6 +547,16 @@ define Device/tl-wr743nd-v2
 endef
 TARGET_DEVICES += tl-wr740n-v1 tl-wr740n-v3 tl-wr740n-v4 tl-wr740n-v5 tl-wr740n-v6 tl-wr741nd-v1 tl-wr741nd-v2 tl-wr741nd-v4 tl-wr741nd-v5 tl-wr743nd-v1 tl-wr743nd-v2
 
+define Device/tl-wr802n-v1
+    $(Device/tplink-4mlzma)
+    DEVICE_TITLE := TP-LINK TL-WR802N v1
+	BOARDNAME := TL-WR802N-v1
+    DEVICE_PROFILE := TLWR802
+    TPLINK_HWID := 0x08020001
+    TPLINK_HWREV := 1
+endef
+TARGET_DEVICES += tl-wr802n-v1
+
 define Device/tl-wr841-v1.5
     $(Device/tplink-4m)
     DEVICE_TITLE := TP-LINK TL-WR841N/ND v1.5
@@ -601,6 +621,9 @@ define Device/tl-wr841-v11
    BOARDNAME := TL-WR841N-v11
    DEVICE_PROFILE := TLWR841
    TPLINK_HWID := 0x08410011
+   IMAGES += factory-us.bin factory-eu.bin
+   IMAGE/factory-us.bin := append-rootfs | mktplinkfw factory -C US
+   IMAGE/factory-eu.bin := append-rootfs | mktplinkfw factory -C EU
 endef
 
 define Device/tl-wr842n-v1

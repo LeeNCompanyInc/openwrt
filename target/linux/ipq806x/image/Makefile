@@ -40,6 +40,8 @@ define Device/Default
 	KERNEL_DEPENDS = $$(wildcard $(DTS_DIR)/$$(DEVICE_DTS).dts)
 	KERNEL_INITRAMFS_PREFIX := $$(IMG_PREFIX)-$(1)-initramfs
 	KERNEL_PREFIX := $$(IMAGE_PREFIX)
+	SUPPORTED_DEVICES = $$(BOARD_NAME)
+	IMAGE/sysupgrade.tar = sysupgrade-tar | append-metadata
 endef
 
 define Device/LegacyImage
@@ -58,7 +60,7 @@ define Device/UbiFit
 	KERNEL_IN_UBI := 1
 	IMAGES := nand-factory.ubi nand-sysupgrade.tar
 	IMAGE/nand-factory.ubi := append-ubi
-	IMAGE/nand-sysupgrade.tar := sysupgrade-tar
+	IMAGE/nand-sysupgrade.tar := sysupgrade-tar | append-metadata
 endef
 
 define Device/DniImage
@@ -73,7 +75,6 @@ define Device/DniImage
 	UBINIZE_OPTS := -E 5
 	IMAGES := factory.img sysupgrade.tar
 	IMAGE/factory.img := append-kernel | append-ubi | netgear-dni
-	IMAGE/sysupgrade.tar = sysupgrade-tar
 endef
 DEVICE_VARS += NETGEAR_BOARD_ID NETGEAR_HW_ID
 
@@ -86,9 +87,21 @@ define Device/TpSafeImage
 	TPLINK_BOARD_NAME :=
 	IMAGES := factory.bin sysupgrade.bin
 	IMAGE/factory.bin := append-rootfs | tplink-safeloader factory
-	IMAGE/sysupgrade.bin := append-rootfs | tplink-safeloader sysupgrade
+	IMAGE/sysupgrade.bin := append-rootfs | tplink-safeloader sysupgrade | append-metadata
 endef
 DEVICE_VARS += TPLINK_BOARD_NAME
+
+define Device/ZyXELImage
+	PROFILES += $$(DEVICE_NAME)
+	FILESYSTEMS := squashfs
+	KERNEL_SUFFIX := -uImage
+	KERNEL = kernel-bin | append-dtb | uImage none | pad-to $${KERNEL_SIZE}
+	KERNEL_NAME := zImage
+	IMAGES := sysupgrade.tar mmcblk0p5-rootfs.bin mmcblk0p4-kernel.bin
+	IMAGE/sysupgrade.tar/squashfs := append-rootfs | pad-to $$$${BLOCKSIZE} | sysupgrade-tar rootfs=$$$$@ | append-metadata
+	IMAGE/mmcblk0p5-rootfs.bin := append-rootfs | pad-rootfs | pad-to $$$${BLOCKSIZE}
+	IMAGE/mmcblk0p4-kernel.bin := append-kernel
+endef
 
 define Device/AP148
 	$(call Device/FitImage)
@@ -158,7 +171,6 @@ define Device/EA8500
 	UBINIZE_OPTS := -E 5
 	IMAGES := factory.bin sysupgrade.tar
 	IMAGE/factory.bin := append-kernel | pad-to $$$${KERNEL_SIZE} | append-ubi
-	IMAGE/sysupgrade.tar := sysupgrade-tar
 	DEVICE_TITLE := Linksys EA8500
 	DEVICE_PACKAGES := ath10k-firmware-qca99x0
 endef
@@ -202,6 +214,16 @@ define Device/R7800
 	DEVICE_PACKAGES := ath10k-firmware-qca9984
 endef
 
-TARGET_DEVICES += AP148 AP148-legacy C2600 D7800 DB149 EA8500 R7500 R7500v2 R7800
+define Device/NBG6817
+	DEVICE_DTS := qcom-ipq8065-nbg6817
+	KERNEL_SIZE := 4096k
+	BLOCKSIZE := 64k
+	BOARD_NAME := nbg6817
+	DEVICE_TITLE := ZyXEL NBG6817
+	DEVICE_PACKAGES := ath10k-firmware-qca9984 e2fsprogs losetup
+	$(call Device/ZyXELImage)
+endef
+
+TARGET_DEVICES += AP148 AP148-legacy C2600 D7800 DB149 EA8500 R7500 R7500v2 R7800 NBG6817
 
 $(eval $(call BuildImage))

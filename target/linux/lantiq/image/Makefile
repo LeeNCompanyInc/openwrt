@@ -64,8 +64,9 @@ define Device/Default
   DEVICE_DTS := $(1)
   DEVICE_DTS_DIR := ../dts
   IMAGE_SIZE :=
+  SUPPORTED_DEVICES = $$(DEVICE_DTS)
   IMAGES := sysupgrade.bin
-  IMAGE/sysupgrade.bin := append-kernel | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := append-kernel | append-rootfs | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
 endef
 DEVICE_VARS += IMAGE_SIZE
 
@@ -85,7 +86,7 @@ endef
 
 define Device/NAND
   $(Device/NAND/$(SUBTARGET))
-  IMAGE/sysupgrade.bin := sysupgrade-tar
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 
 define Device/lantiqBrnImage
@@ -358,10 +359,10 @@ define Device/DGN3500
 	factory-NA.bin factory-WW.bin
   IMAGE/sysupgrade-NA.bin := \
 	append-kernel | append-rootfs | dgn3500-sercom-footer 0x0 "NA" | \
-	pad-rootfs | check-size $$$$(IMAGE_SIZE)
+	pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
   IMAGE/sysupgrade-WW.bin := \
 	append-kernel | append-rootfs | dgn3500-sercom-footer 0x0 "WW" | \
-	pad-rootfs | check-size $$$$(IMAGE_SIZE)
+	pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
   IMAGE/factory-NA.bin := \
 	pad-extra $(DGN3500_KERNEL_OFFSET_DEC) | append-kernel | append-rootfs | \
 	dgn3500-sercom-footer $(DGN3500_KERNEL_OFFSET_HEX) "NA" | pad-rootfs | \
@@ -385,7 +386,7 @@ define Device/DGN3500B
   IMAGES += factory.bin
   IMAGE/sysupgrade.bin := \
 	append-kernel | append-rootfs | dgn3500-sercom-footer 0x0 "DE" | \
-	pad-rootfs | check-size $$$$(IMAGE_SIZE)
+	pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
   IMAGE/factory.bin := \
 	pad-extra $(DGN3500_KERNEL_OFFSET_DEC) | append-kernel | append-rootfs | \
 	dgn3500-sercom-footer $(DGN3500_KERNEL_OFFSET_HEX) "DE" | pad-rootfs | \
@@ -547,7 +548,7 @@ TARGET_DEVICES += WBMR300
 define Device/VGV7510KW22NOR
   IMAGE_SIZE := 15232k
   DEVICE_TITLE := o2 Box 6431 / Arcadyan VGV7510KW22 (NOR)
-  DEVICE_PACKAGES := kmod-rt2800-pci wpad-mini kmod-usb-dwc2
+  DEVICE_PACKAGES := kmod-rt2800-pci wpad-mini kmod-usb-dwc2 kmod-ltq-tapi kmod-ltq-vmmc
 endef
 TARGET_DEVICES += VGV7510KW22NOR
 
@@ -558,14 +559,14 @@ define Device/VGV7510KW22BRN
   MAGIC := 0x12345678
   CRC32_POLY := 0x2083b8ed
   DEVICE_TITLE := o2 Box 6431 / Arcadyan VGV7510KW22 (BRN)
-  DEVICE_PACKAGES := kmod-rt2800-pci wpad-mini kmod-usb-dwc2
+  DEVICE_PACKAGES := kmod-rt2800-pci wpad-mini kmod-usb-dwc2 kmod-ltq-tapi kmod-ltq-vmmc
 endef
 TARGET_DEVICES += VGV7510KW22BRN
 
 define Device/VGV7519NOR
   IMAGE_SIZE := 15360k
   DEVICE_TITLE := Experiabox 8 VGV7519
-  DEVICE_PACKAGES := kmod-rt2800-pci wpad-mini kmod-usb-dwc2
+  DEVICE_PACKAGES := kmod-rt2800-pci wpad-mini kmod-usb-dwc2 kmod-ltq-tapi kmod-ltq-vmmc
 endef
 TARGET_DEVICES += VGV7519NOR
 
@@ -576,7 +577,7 @@ define Device/VGV7519BRN
   MAGIC := 0x12345678
   CRC32_POLY := 0x2083b8ed
   DEVICE_TITLE := Experiabox 8 VGV7519 (BRN)
-  DEVICE_PACKAGES := kmod-rt2800-pci wpad-mini kmod-usb-dwc2
+  DEVICE_PACKAGES := kmod-rt2800-pci wpad-mini kmod-usb-dwc2 kmod-ltq-tapi kmod-ltq-vmmc
 endef
 TARGET_DEVICES += VGV7519BRN
 

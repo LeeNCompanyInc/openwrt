@@ -271,6 +271,14 @@ config ATH79_MACH_SOM9331
 	select ATH79_DEV_USB
 	select ATH79_DEV_WMAC
 
+config ATH79_MACH_BHR_4GRV2
+	bool "Buffalo BHR-4GRV2 board support"
+	select SOC_QCA955X
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_M25P80
+
 config ATH79_MACH_WHR_HP_G300N
 	bool "Buffalo WHR-HP-G300N board support"
 	select SOC_AR724X
@@ -533,6 +541,22 @@ config ATH79_MACH_DLAN_PRO_1200_AC
 	select ATH79_DEV_WMAC
 	select ATH79_DEV_NFC
 	select ATH79_DEV_USB
+
+config ATH79_MACH_DOMYWIFI_DW33D
+	bool "DomyWifi DW33D support"
+	select SOC_QCA955X
+	select ATH79_DEV_AP9X_PCI if PCI
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_M25P80
+	select ATH79_DEV_NFC
+	select ATH79_DEV_WMAC
+	select ATH79_DEV_USB
+	select MTD_NAND
+	select MTD_NAND_ECC
+	select MTD_NAND_AR934X
+	select MTD_NAND_AR934X_HW_ECC
 
 config ATH79_MACH_DR344
 	bool "Wallys DR344 board support"
@@ -1374,6 +1398,14 @@ config ATH79_MACH_TL_WR741ND_V4
 	select ATH79_DEV_USB
 	select ATH79_DEV_WMAC
 
+config ATH79_MACH_TL_WR802N_V1
+	bool "TP-LINK TL-WR802N v1 support"
+	select SOC_QCA953X
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_M25P80
+
 config ATH79_MACH_TL_WR810N
 	bool "TP-LINK TL-WR810N support"
 	select SOC_QCA953X
@@ -1674,3 +1706,23 @@ config ATH79_MACH_QIHOO_C301
 	select ATH79_DEV_WMAC
 	select ATH79_DEV_USB
 	select ATH79_NVRAM
+
+config ATH79_MACH_DAP_2695_A1
+	bool "D-Link DAP-2695 rev. A1 support"
+	select SOC_QCA955X
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_M25P80
+	select ATH79_DEV_WMAC
+
+config ATH79_MACH_TL_WPA8630
+	bool "TP-Link TL-WPA8630 support"
+	select SOC_QCA956X
+	select ATH79_DEV_AP9X_PCI if PCI
+	select ATH79_DEV_ETH
+	select ATH79_DEV_GPIO_BUTTONS
+	select ATH79_DEV_LEDS_GPIO
+	select ATH79_DEV_M25P80
+	select ATH79_DEV_WMAC
+

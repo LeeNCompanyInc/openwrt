@@ -4,7 +4,7 @@
 
 / {
 	model = "Netgear Nighthawk X4S R7800";
-	compatible = "netgear,r7800", "qcom,ipq8065";
+	compatible = "netgear,r7800", "qcom,ipq8065", "qcom,ipq8064";
 
 	memory@0 {
 		reg = <0x42000000 0x1e000000>;
@@ -19,15 +19,24 @@
 			reg = <0x41200000 0x300000>;
 			no-map;
 		};
+
+		rsvd@5fe00000 {
+			reg = <0x5fe00000 0x200000>;
+			reusable;
+		};
 	};
 
 	aliases {
 		serial0 = &uart4;
 		mdio-gpio0 = &mdio0;
+
+		led-boot = &power_white;
+		led-failsafe = &power_white;
+		led-running = &power_white;
+		led-upgrade = &power_amber;
 	};
 
 	chosen {
-		bootargs = "rootfstype=squashfs noinitrd";
 		linux,stdout-path = "serial0:115200n8";
 	};
 
@@ -101,13 +110,59 @@
 				mux {
 					pins = "gpio18", "gpio19", "gpio21";
 					function = "gsbi5";
+					bias-pull-down;
+				};
+
+				data {
+					pins = "gpio18", "gpio19";
 					drive-strength = <10>;
-					bias-none;
 				};
 
 				cs {
 					pins = "gpio20";
+					drive-strength = <10>;
+					bias-pull-up;
+				};
+
+				clk {
+					pins = "gpio21";
 					drive-strength = <12>;
+				};
+			};
+
+			spi6_pins: spi6_pins {
+				mux {
+					pins = "gpio55", "gpio56", "gpio58";
+					function = "gsbi6";
+					bias-pull-down;
+				};
+
+				mosi {
+					pins = "gpio55";
+					drive-strength = <12>;
+				};
+
+				miso {
+					pins = "gpio56";
+					drive-strength = <14>;
+				};
+
+				cs {
+					pins = "gpio57";
+					drive-strength = <12>;
+					bias-pull-up;
+				};
+
+				clk {
+					pins = "gpio58";
+					drive-strength = <12>;
+				};
+
+				reset {
+					pins = "gpio33";
+					drive-strength = <10>;
+					bias-pull-down;
+					output-high;
 				};
 			};
 		};
@@ -130,7 +185,7 @@
 			qcom,mode = <GSBI_PROT_SPI>;
 			status = "ok";
 
-			spi4: spi@1a280000 {
+			spi5: spi@1a280000 {
 				status = "ok";
 				spi-max-frequency = <50000000>;
 				pinctrl-0 = <&spi_pins>;
@@ -139,13 +194,32 @@
 				cs-gpios = <&qcom_pinmux 20 0>;
 
 				flash: m25p80@0 {
-					compatible = "s25fl512s";
+					compatible = "jedec,spi-nor";
 					#address-cells = <1>;
 					#size-cells = <1>;
-					spi-max-frequency = <51200000>;
+					spi-max-frequency = <50000000>;
 					reg = <0>;
 
 					linux,part-probe = "qcom-smem";
+				};
+			};
+		};
+
+		gsbi6: gsbi@16500000 {
+			qcom,mode = <GSBI_PROT_SPI>;
+			status = "ok";
+			spi6: spi@16580000 {
+				status = "ok";
+				spi-max-frequency = <6000000>;
+				pinctrl-0 = <&spi6_pins>;
+				pinctrl-names = "default";
+
+				cs-gpios = <&qcom_pinmux 57 0>;
+
+				spi-nor@0 {
+					compatible = "spi-nor";
+					reg = <0>;
+					spi-max-frequency = <6000000>;
 				};
 			};
 		};
@@ -155,6 +229,7 @@
 		};
 
 		sata@29000000 {
+			ports-implemented = <0x1>;
 			status = "ok";
 		};
 
@@ -184,16 +259,12 @@
 
 		pcie0: pci@1b500000 {
 			status = "ok";
-			reset-gpio = <&qcom_pinmux 3 GPIO_ACTIVE_LOW>;
-			pinctrl-0 = <&pcie0_pins>;
-			pinctrl-names = "default";
+			phy-tx0-term-offset = <7>;
 		};
 
 		pcie1: pci@1b700000 {
 			status = "ok";
-			reset-gpio = <&qcom_pinmux 48 GPIO_ACTIVE_LOW>;
-			pinctrl-0 = <&pcie1_pins>;
-			pinctrl-names = "default";
+			phy-tx0-term-offset = <7>;
 		};
 
 		nand@1ac00000 {
@@ -203,6 +274,7 @@
 			pinctrl-names = "default";
 
 			nand-ecc-strength = <4>;
+			nand-ecc-step-size = <512>;
 			nand-bus-width = <8>;
 
 			#address-cells = <1>;
@@ -299,6 +371,10 @@
 					0x009a0 0x1e864443  /* QM_PORT6_CTRL0 */
 					0x009a4 0x000001c6  /* QM_PORT6_CTRL1 */
 					>;
+				qca,ar8327-vlans = <
+					0x1	0x5e	    /* VLAN1 Ports 1/2/3/4/6 */
+					0x2	0x21	    /* VLAN2 Ports 0/5 */
+				>;
 			};
 
 			phy4: ethernet-phy@4 {
@@ -363,53 +439,60 @@
 		wifi {
 			label = "wifi";
 			gpios = <&qcom_pinmux 6 1>;
-			linux,code = <KEY_WLAN>;
+			linux,code = <KEY_RFKILL>;
+			debounce-interval = <60>;
+			wakeup-source;
 		};
 
 		reset {
 			label = "reset";
 			gpios = <&qcom_pinmux 54 1>;
 			linux,code = <KEY_RESTART>;
+			debounce-interval = <60>;
+			wakeup-source;
 		};
 
 		wps {
 			label = "wps";
 			gpios = <&qcom_pinmux 65 1>;
 			linux,code = <KEY_WPS_BUTTON>;
+			debounce-interval = <60>;
+			wakeup-source;
 		};
 	};
 
 	gpio-leds {
 		compatible = "gpio-leds";
 
-		usb1 {
-			label = "r7800:amber:usb1";
-			gpios = <&qcom_pinmux 7 0>;
+		power_white: power_white {
+			label = "r7800:white:power";
+			gpios = <&qcom_pinmux 53 0>;
+			default-state = "on";
 		};
 
-		usb3 {
-			label = "r7800:amber:usb3";
-			gpios = <&qcom_pinmux 8 0>;
-		};
-
-		status {
-			label = "r7800:amber:status";
+		power_amber: power_amber {
+			label = "r7800:amber:power";
 			gpios = <&qcom_pinmux 9 0>;
 		};
 
-		internet {
-			label = "r7800:white:internet";
+		wan_white {
+			label = "r7800:white:wan";
 			gpios = <&qcom_pinmux 22 0>;
 		};
 
-		wan {
-			label = "r7800:white:wan";
+		wan_amber {
+			label = "r7800:amber:wan";
 			gpios = <&qcom_pinmux 23 0>;
 		};
 
-		wps {
-			label = "r7800:white:wps";
-			gpios = <&qcom_pinmux 24 0>;
+		usb1 {
+			label = "r7800:white:usb1";
+			gpios = <&qcom_pinmux 7 0>;
+		};
+
+		usb2 {
+			label = "r7800:white:usb2";
+			gpios = <&qcom_pinmux 8 0>;
 		};
 
 		esata {
@@ -417,15 +500,14 @@
 			gpios = <&qcom_pinmux 26 0>;
 		};
 
-		power {
-			label = "r7800:white:power";
-			gpios = <&qcom_pinmux 53 0>;
-			default-state = "on";
-		};
-
 		rfkill {
 			label = "r7800:white:rfkill";
 			gpios = <&qcom_pinmux 64 0>;
+		};
+
+		wps {
+			label = "r7800:white:wps";
+			gpios = <&qcom_pinmux 24 0>;
 		};
 
 		wifi {
@@ -438,16 +520,22 @@
 		compatible = "gpio-export";
 		#size-cells = <0>;
 
-		display_data {
-			gpio-export,name = "usb0";
+		usb1-power {
+			gpio-export,name = "usb1";
 			gpio-export,output = <1>;
 			gpios = <&qcom_pinmux 15 0>;
 		};
 
-		display_clock {
-			gpio-export,name = "usb1";
+		usb2-power {
+			gpio-export,name = "usb2";
 			gpio-export,output = <1>;
 			gpios = <&qcom_pinmux 16 0>;
+		};
+
+		usb-power {
+			gpio-export,name = "usb_p";
+			gpio-export,output = <1>;
+			gpios = <&qcom_pinmux 68 0>;
 		};
 	};
 };

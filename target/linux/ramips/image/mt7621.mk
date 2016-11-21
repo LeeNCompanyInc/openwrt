@@ -49,7 +49,7 @@ TARGET_DEVICES += re6500
 
 define Device/wsr-1166
   DTS := WSR-1166
-  IMAGE/sysupgrade.bin := trx | pad-rootfs
+  IMAGE/sysupgrade.bin := trx | pad-rootfs | append-metadata
   IMAGE_SIZE := $(ralink_default_fw_size_16M)
   DEVICE_TITLE := Buffalo WSR-1166
 endef
@@ -64,7 +64,7 @@ define Device/dir-860l-b1
   IMAGE/sysupgrade.bin := \
 	append-kernel | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs | \
 	seama -m "dev=/dev/mtdblock/2" -m "type=firmware" | \
-	pad-rootfs | check-size $$$$(IMAGE_SIZE)
+	pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
   IMAGE/factory.bin := \
 	append-kernel | pad-offset $$$$(BLOCKSIZE) 64 | \
 	append-rootfs | pad-rootfs -x 64 | \
@@ -72,6 +72,7 @@ define Device/dir-860l-b1
 	seama-seal -m "signature=wrgac13_dlink.2013gui_dir860lb" | \
 	check-size $$$$(IMAGE_SIZE)
   DEVICE_TITLE := D-Link DIR-860L B1
+  DEVICE_PACKAGES := kmod-usb3 kmod-usb-ledtrig-usbport
 endef
 TARGET_DEVICES += dir-860l-b1
 
@@ -85,7 +86,7 @@ TARGET_DEVICES += firewrt
 
 define Device/newifi-d1
   DTS := Newifi-D1
-  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  IMAGE_SIZE := $(ralink_default_fw_size_32M)
   DEVICE_TITLE := Newifi D1
   DEVICE_PACKAGES := kmod-usb3 kmod-usb-ledtrig-usbport kmod-i2c-mt7621
 endef
@@ -96,7 +97,7 @@ define Device/pbr-m1
   IMAGE_SIZE := $(ralink_default_fw_size_16M)
   DEVICE_TITLE := PBR-M1
   DEVICE_PACKAGES := kmod-usb3 kmod-usb-ledtrig-usbport kmod-ata-core kmod-ata-ahci \
-	kmod-rtc-pcf8563 kmod-i2c-mt7621
+	kmod-i2c-mt7621
 endef
 TARGET_DEVICES += pbr-m1
 
@@ -119,7 +120,7 @@ define Device/witi
   IMAGE_SIZE := $(ralink_default_fw_size_16M)
   DEVICE_TITLE := MQmaker WiTi
   DEVICE_PACKAGES := kmod-usb3 kmod-usb-ledtrig-usbport kmod-ata-core kmod-ata-ahci \
-	kmod-rtc-pcf8563 kmod-i2c-mt7621
+	kmod-i2c-mt7621
 endef
 TARGET_DEVICES += witi
 
@@ -147,6 +148,14 @@ define Device/zbt-wg3526
 endef
 TARGET_DEVICES += zbt-wg3526
 
+define Device/ac1200pro
+  DTS := AC1200pro
+  IMAGE_SIZE := $(ralink_default_fw_size_32M)
+  DEVICE_TITLE := Digineo AC1200 Pro
+  DEVICE_PACKAGES := kmod-usb3 kmod-ledtrig-usbdev kmod-ata-core kmod-ata-ahci
+endef
+TARGET_DEVICES += ac1200pro
+
 define Device/wf-2881
   DTS := WF-2881
   BLOCKSIZE := 128k
@@ -155,7 +164,7 @@ define Device/wf-2881
   IMAGE_SIZE := 129280k
   KERNEL := $(KERNEL_DTB) | pad-offset $$(BLOCKSIZE) 64 | uImage lzma
   UBINIZE_OPTS := -E 5
-  IMAGE/sysupgrade.bin := append-kernel | append-ubi | check-size $$$$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := append-kernel | append-ubi | append-metadata | check-size $$$$(IMAGE_SIZE)
   DEVICE_TITLE := NETIS WF-2881
   DEVICE_PACKAGES := kmod-usb3 kmod-usb-ledtrig-usbport
 endef
@@ -168,7 +177,7 @@ define Device/ubnt-erx
   KERNEL := $(KERNEL_DTB) | uImage lzma
   IMAGES := sysupgrade.tar
   KERNEL_INITRAMFS := $$(KERNEL) | ubnt-erx-factory-image $(KDIR)/tmp/$$(KERNEL_INITRAMFS_PREFIX)-factory.tar
-  IMAGE/sysupgrade.tar := sysupgrade-tar
+  IMAGE/sysupgrade.tar := sysupgrade-tar | append-metadata
   DEVICE_TITLE := Ubiquiti EdgeRouter X
   DEVICE_PACKAGES := -kmod-mt76 -kmod-rt2x00-lib -kmod-mac80211 -kmod-cfg80211 -wpad-mini -iwinfo
 endef
@@ -189,6 +198,14 @@ define Device/vr500
   DEVICE_PACKAGES := kmod-usb3
 endef
 TARGET_DEVICES += vr500
+
+define Device/rb750gr3
+  DTS := RB750Gr3
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := MikroTik RB750Gr3
+  DEVICE_PACKAGES := kmod-usb3 kmod-ledtrig-usbdev uboot-envtools -kmod-mt76 -kmod-rt2x00-lib -kmod-mac80211 -kmod-cfg80211 -wpad-mini -iwinfo
+endef
+TARGET_DEVICES += rb750gr3
 
 # FIXME: is this still needed?
 define Image/Prepare

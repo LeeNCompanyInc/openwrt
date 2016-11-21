@@ -217,6 +217,9 @@ tplink_board_detect() {
 	"080100"*)
 		model="TP-Link TL-WA801N/ND"
 		;;
+	"080200"*)
+		model="TP-Link TL-WR802N"
+		;;
 	"083000"*)
 		model="TP-Link TL-WA830RE"
 
@@ -479,6 +482,9 @@ ar71xx_board_detect() {
 	*AW-NR580)
 		name="aw-nr580"
 		;;
+	*BHR-4GRV2)
+		name="bhr-4grv2"
+		;;
 	*CAP324)
 		name="cap324"
 		;;
@@ -507,6 +513,9 @@ ar71xx_board_detect() {
 		;;
 	*CR5000)
 		name="cr5000"
+		;;
+	*"DAP-2695 rev. A1")
+		name="dap-2695-a1"
 		;;
 	*"DB120 reference board")
 		name="db120"
@@ -565,6 +574,9 @@ ar71xx_board_detect() {
 		;;
 	*"Domino Pi")
 		name="gl-domino"
+		;;
+	*"DW33D")
+		name="dw33d"
 		;;
 	*"EAP120")
 		name="eap120"
@@ -946,6 +958,9 @@ ar71xx_board_detect() {
 	*"TL-WA801ND v3")
 		name="tl-wa801nd-v3"
 		;;
+	*"TL-WR802N v1")
+		name="tl-wr802n-v1"
+		;;
 	*TL-WA901ND)
 		name="tl-wa901nd"
 		;;
@@ -972,6 +987,9 @@ ar71xx_board_detect() {
 		;;
 	*"TL-WDR6500 v2")
 		name="tl-wdr6500-v2"
+		;;
+	*TL-WPA8630)
+		name="tl-wpa8630"
 		;;
 	*TL-WR741ND)
 		name="tl-wr741nd"

@@ -2,6 +2,8 @@
 
 #include "danube.dtsi"
 
+#include <dt-bindings/input/input.h>
+
 / {
 	model = "ARV8539PW22 - Speedport W 504V Typ A";
 
@@ -72,7 +74,6 @@
 				ath,mac-increment = <1>;
 				ath,pci-slot = <14>;
 				ath,eep-endian;
-				ath,arv-ath9k-fix;
 			};
 		};
 
@@ -120,7 +121,6 @@
 			gpios = <&gpio 14 GPIO_ACTIVE_HIGH>;
 			lantiq,portmask = <0x3>;
 		};
-
 	};
 
 	gpio-keys-polled {

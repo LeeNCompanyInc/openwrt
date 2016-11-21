@@ -71,6 +71,8 @@ ar71xx_setup_interfaces()
 	eap7660d|\
 	el-mini|\
 	loco-m-xw|\
+	mr12|\
+	mr16|\
 	mr1750|\
 	mr1750v2|\
 	mr18|\
@@ -106,6 +108,7 @@ ar71xx_setup_interfaces()
 	tl-wa901nd-v3|\
 	tl-wa901nd-v4|\
 	tl-wr703n|\
+	tl-wr802n-v1|\
 	tube2h|\
 	unifiac-lite|\
 	wndap360|\
@@ -161,6 +164,7 @@ ar71xx_setup_interfaces()
 		;;
 	ap135-020|\
 	ap136-020|\
+	bhr-4grv2|\
 	tew-823dru|\
 	tl-wr1043nd-v2|\
 	wzr-450hp2)
@@ -228,6 +232,9 @@ ar71xx_setup_interfaces()
 	wndr4300)
 		ucidef_add_switch "switch0" \
 			"0@eth0" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan"
+		;;
+	dap-2695-a1)
+		ucidef_add_switch "switch0" "0@eth0" "2:lan" "3:wan" "6@eth1"
 		;;
 	db120|\
 	rb-2011l|\
@@ -305,6 +312,7 @@ ar71xx_setup_interfaces()
 		ucidef_add_switch "switch0" \
 			"0@eth0" "2:lan" "3:lan"
 		;;
+	dw33d|\
 	f9k1115v2)
 		ucidef_set_interfaces_lan_wan "eth1" "eth0"
 		ucidef_add_switch "switch0" \
@@ -358,6 +366,10 @@ ar71xx_setup_interfaces()
 	tl-wr1041n-v2)
 		ucidef_add_switch "switch0" \
 			"0@eth0" "2:lan:1" "3:lan:2" "4:lan:3" "5:lan:4" "1:wan"
+		;;
+	tl-wpa8630)
+		ucidef_add_switch "switch0" \
+			"0@eth0" "2:lan:3" "3:lan:2" "4:lan:1" "5:lan:4"
 		;;
 	tl-wr1043nd)
 		ucidef_add_switch "switch0" \
